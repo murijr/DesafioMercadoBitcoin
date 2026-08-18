@@ -38,6 +38,75 @@ Toda feature nasce **teste primeiro**: vermelho → verde → refatorar. Aplica-
 
 A **mecanização** desse processo vive no **G7/G8** (ver Guardrails) — quem decide se o teste nasceu vermelho é quem está escrevendo o código; o orchestrator só verifica que a suíte continua passando.
 
+## Convenção de testes
+
+Referenciada pelos três `AGENTS.md` de módulo como "convenção completa". Vale para `:domain`, `:data` e `:app`.
+
+### Estrutura: `Enclosed` + contextos aninhados
+
+Uma classe de teste por unidade sob teste, anotada com `@RunWith(Enclosed::class)`. O *setup* comum vive numa classe base aberta `TestSetup`; cada contexto é uma classe aninhada que a estende.
+
+```kotlin
+@RunWith(Enclosed::class)
+class CreateShortUrlUseCaseTest {
+
+    abstract class TestSetup {
+        protected val repository = mockk<ShortUrlRepository>()
+        protected val useCase = CreateShortUrlUseCase(repository)
+    }
+
+    class HappyPath : TestSetup() {
+        @Test
+        fun `given a valid url when execute then returns the shortened url`() = runTest {
+            // ...
+        }
+    }
+
+    class ErrorPath : TestSetup() {
+        @Test
+        fun `given a blank url when execute then fails with Validation`() = runTest {
+            // ...
+        }
+    }
+}
+```
+
+- **`HappyPath`** e **`ErrorPath`** são obrigatórios. O mínimo por `UseCase` e por `RepositoryImpl` está no `AGENTS.md` do módulo.
+- **`EdgeCases`** é opcional: entra quando houver caso intermediário (limite, múltiplos erros, entrada degenerada).
+- Contexto sem teste não existe. Não criar `EdgeCases` vazio "para depois".
+
+### Nomes em Gherkin
+
+O nome do teste é uma frase em *backticks*, no formato `given <contexto> when <ação> then <resultado observável>`.
+
+- Em inglês, como todo identificador de código — só a prosa da documentação é pt-BR.
+- O `then` descreve o que se **observa**, não o que se implementou: `then fails with Validation`, não `then calls validate`.
+- Sem `should`, sem numeração, sem nome do método sob teste repetido no início.
+
+### Asserções
+
+- Comparar o **subtipo** do erro e seus dados, nunca o texto da mensagem — `DomainError` carrega `TextKey`, e o texto só existe depois do `ResourceProvider`.
+- Verificar ausência de interação quando a regra é "não deve chamar": `coVerify(exactly = 0) { repository.foo() }`.
+- Um comportamento por `@Test`. Se o nome precisa de "and", provavelmente são dois testes.
+
+### Corrotinas
+
+- `runTest { }` para tudo que suspende.
+- Teste de cancelamento verifica que `CancellationException` **escapa**, e não que virou `Result.failure`.
+
+## Configuração local
+
+A chave da API da CoinMarketCap é lida de `local.properties` (não versionado) ou da variável de ambiente `CMC_API_KEY`:
+
+```properties
+# local.properties
+cmc.api.key=SUA_CHAVE_AQUI
+```
+
+O padrão é **string vazia**: quem clona o repositório compila e roda a suíte G8 inteira sem credencial. A ausência da chave só se manifesta em tempo de execução, como `DomainError.Network` — o build nunca quebra por isso. O valor chega a `:data` por injeção (`CoinMarketCapConfig` no módulo Koin), nunca lido diretamente pela camada de dados.
+
+O SDK do Android vem de `sdk.dir` no mesmo `local.properties`. Em WSL, aponte para um SDK **Linux** — um SDK do Windows (`aapt.exe`) faz o AGP reportar "Build Tools corrupted".
+
 ## Estrutura multi-módulo
 
 Topologia `:domain` (Kotlin puro) → `:data` (android-library) → `:app` (android-application). Setas = "depende de".
@@ -79,8 +148,8 @@ A arquitetura é protegida por **mais de um guardrail em camadas** — cada um c
 | 4 | KtLint            | estilo    | `## Estilo` (`:ktlintCheck` em CI; `:ktlintFormat` **só local**). `.editorconfig` na raiz. |
 | 5 | R8 / Proguard     | mecânico  | `keepRules/rules.keep` consistente — `kotlinx-serialization`, Ktor DSL, Koin via reflexão, `@Parcelize`. Falha se `:app:assembleRelease` quebrar ou `ColdStartSmokeTest` falhar. |
 | 6 | Android Lint + Slack Compose | estático | Severidade de `Manifest`/recursos/a11y/`NewApi`/`HardcodedText`, regras `androidx.compose.lint` + `slack-compose-lints` (API design de Composables). `abortOnError = true` em `app/build.gradle.kts`. |
-| 7 | Testes unitários  | mecânico  | `:domain:test` + `:data:testDebugUnitTest` + `:konsistTest` (JVM puro). Vermelho = bloqueia a finalização. |
-| 8 | Execução no fim da feature | processo | O orchestrator (ou humano) roda `./gradlew detekt ktlintCheck :app:lintDebug :konsistTest:test :domain:test :data:testDebugUnitTest` antes de declarar a feature pronta. Ordem: barato → caro. Detalhes em [`app/AGENTS.md`](./app/AGENTS.md). |
+| 7 | Testes unitários  | mecânico  | `:domain:test` + `:data:testDebugUnitTest` + `:app:testDebugUnitTest` + `:konsistTest:test` (JVM puro, Robolectric sem emulador). Vermelho = bloqueia a finalização. |
+| 8 | Execução no fim da feature | processo | O orchestrator (ou humano) roda `./gradlew detekt ktlintCheck :app:lintDebug :konsistTest:test :domain:test :data:testDebugUnitTest :app:testDebugUnitTest` antes de declarar a feature pronta. Ordem: barato → caro. Detalhes em [`app/AGENTS.md`](./app/AGENTS.md). |
 
 **Falha de guardrail = corrigir no código, nunca na configuração.** Nada de `baseline.xml`/`@Suppress`/`--ignore-rules`/`// ktlint-disable`/`disable+=...` pra forçar passar.
 
@@ -102,6 +171,8 @@ A arquitetura é protegida por **mais de um guardrail em camadas** — cada um c
 - Não introduzir `LiveData`, RxJava, Retrofit, Gson/Moshi, Hilt/Dagger sem decisão explícita — o stack já está fixado.
 - Não desabilitar/suprimir/contornar guardrail pra forçar passar — corrigir a causa no código.
 
-## Idiom/new- Toda documentação gerada pelo agente (.md, comentários, respostas em chat) deve ser escrita em português do Brasil (pt-BR).
+## Idioma
+
+- Toda documentação gerada pelo agente (.md, comentários, respostas em chat) deve ser escrita em português do Brasil (pt-BR).
 - Nomes de arquivos, chaves YAML, mensagens de commit, identificadores de código e comandos CLI permanecem em inglês. Apenas o conteúdo prose é em pt-BR.
 - Quando citar ferramentas/conceitos com nome consolidado em inglês ("git worktree", "merge", "review"), mantenha o termo em itálico ou entre aspas, sem traduzir.

@@ -5,7 +5,7 @@
 ## Layout
 
 ```
-app/src/main/java/com/desafiomb/
+app/src/main/kotlin/com/desafiomercadobitcoin/
 ├── di/                  # módulos Koin do app (wire-up das camadas)
 ├── presentation/
 │   ├── common/          # ResourceProvider, TextKey sealed
@@ -51,7 +51,7 @@ Modelos de apresentação. Vivem em `:app/.../presentation/feature/<feature>/`. 
 
 - `ResourceProvider` em `:app/presentation/common/` resolve `TextKey` (do `:domain`) → `R.string.*`.
 - ViewModels usam `ResourceProvider` para tornar `DomainError` em string localizável **antes** de emitir `State.Error`/`Effect.ShowSnackbar`.
-- **Nunca** string hardcoded em `Composable`/`State` — `HardcodedText` é severidade `ERROR` no G6.
+- **Nunca** string hardcoded em `Composable`/`State`. Atenção: `HardcodedText` do Android Lint só analisa layouts XML e o `compose-lint-checks` não tem detector equivalente — quem reprova literal em `Composable` é o **G2** (`PresentationRulesTest`), não o G6.
 - **Nunca** passar `Context` para `:domain`/`:data`.
 
 ## Injeção de dependência (app)
@@ -77,6 +77,7 @@ Convenção completa (Gherkin + Enclosed + Happy/Error) no root.
 
 - `app/src/main/AndroidManifest.xml` — manter mínimo. Se adicionar `<activity>`, declarar `android:exported` conforme requisitos do target SDK 37.
 - `app/src/main/keepRules/rules.keep` — regras Proguard/R8 consumidas pelo AGP. Sem essa checagem, `kotlinx-serialization`, Ktor DSL, Koin resolvido por reflexão, `@Parcelize` em `SavedStateHandle` quebram silenciosamente no release (G5).
+- `scripts/release-smoke-check.sh` — verificação do G5 sobre o **artefato ofuscado**: monta o release com R8, instala e confirma que o app sobe. Exige dispositivo, então roda manualmente ou em CI, **fora** do comando G8. Nota: enquanto a casca não exercitar serialização, `@Parcelize` ou reflexão no arranque, nenhuma *keep rule* é load-bearing — o valor desta guarda cresce com a primeira feature.
 
 ## G8 — execução dos guardrails no fim da feature
 
@@ -85,7 +86,7 @@ As guardas mecânicas (G2, G3, G4, G6, G7) são responsabilidade do **agente orq
 ### Comando
 
 ```text
-./gradlew detekt ktlintCheck :app:lintDebug :konsistTest:test :domain:test :data:testDebugUnitTest
+./gradlew detekt ktlintCheck :app:lintDebug :konsistTest:test :domain:test :data:testDebugUnitTest :app:testDebugUnitTest
 ```
 
 A ordem segue o critério "barato primeiro, caro por último":
@@ -95,6 +96,7 @@ A ordem segue o critério "barato primeiro, caro por último":
 - `:konsistTest:test` — JVM puro, segundos
 - `:domain:test` — JVM puro, segundos
 - `:data:testDebugUnitTest` — JVM com Robolectric, ~30s
+- `:app:testDebugUnitTest` — JVM com Robolectric + Compose UI Test, ~1min
 
 ### Quando uma guarda falha
 
