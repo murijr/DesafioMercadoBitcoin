@@ -26,3 +26,4 @@ rootProject.name = "DesafioMercadoBitcoin"
 include(":app")
 include(":domain")
 include(":data")
+include(":konsistTest")

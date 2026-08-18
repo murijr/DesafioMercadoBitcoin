@@ -1,12 +1,49 @@
-# Add project specific R8 rules here.
-# AGP will combine all keep rule files in src/main/keepRules to pass to R8
-#
-# For more details, see
-#   https://d.android.com/r/tools/r8/keep-rules
+# G5 -- keep rules do :app. Consumidas pelo AGP a partir de src/main/keepRules.
+# Cada bloco existe porque algo e resolvido em runtime (reflexao/serializacao) e o R8
+# nao consegue provar o uso estaticamente.
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# --- kotlinx.serialization -----------------------------------------------------------
+# O serializer de cada @Serializable e obtido por reflexao no Companion.
+-keepattributes *Annotation*, InnerClasses, Signature, RuntimeVisibleAnnotations
+-dontnote kotlinx.serialization.**
+
+-if @kotlinx.serialization.Serializable class **
+-keepclassmembers class <1> {
+    static <1>$Companion Companion;
+}
+-if @kotlinx.serialization.Serializable class ** {
+    static **$* *;
+}
+-keepclassmembers class <2>$<3> {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+-keepclasseswithmembers class ** {
+    @kotlinx.serialization.Serializable <fields>;
+}
+-keep,includedescriptorclasses class com.desafiomercadobitcoin.**$$serializer { *; }
+
+# --- Ktor ----------------------------------------------------------------------------
+# Plugins e o roteamento type-safe (@Resource) sao resolvidos por atributos/reflexao.
+-keep class io.ktor.** { *; }
+-keepclassmembers class io.ktor.** { volatile <fields>; }
+-keep @io.ktor.resources.Resource class * { *; }
+-dontwarn io.ktor.**
+-dontwarn org.slf4j.**
+
+# --- Koin ----------------------------------------------------------------------------
+# `get()` resolve por tipo em runtime; construtores injetados nao podem ser removidos.
+-keep class org.koin.** { *; }
+-keepclassmembers class * {
+    public <init>(...);
+}
+-dontwarn org.koin.**
+
+# --- @Parcelize / SavedStateHandle ----------------------------------------------------
+# O CREATOR e gerado e lido reflexivamente pelo framework ao restaurar estado.
+-keep class * implements android.os.Parcelable {
+    public static final ** CREATOR;
+}
+
+# --- Coroutines ----------------------------------------------------------------------
+-keepclassmembers class kotlinx.coroutines.** { volatile <fields>; }
+-dontwarn kotlinx.coroutines.**

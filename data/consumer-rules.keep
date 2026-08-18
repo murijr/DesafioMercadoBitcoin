@@ -1,0 +1,11 @@
+# G5 -- regras que :data impoe a quem a consome. O AGP as anexa ao R8 do :app.
+# Aqui fica so o que e especifico desta camada; o resto vive em app/src/main/keepRules.
+
+# DTOs desta camada sao desserializados por reflexao a partir do JSON da CoinMarketCap.
+-keep,includedescriptorclasses class com.desafiomercadobitcoin.data.**$$serializer { *; }
+-keepclassmembers class com.desafiomercadobitcoin.data.** {
+    *** Companion;
+}
+
+# Engine Android do Ktor.
+-keep class io.ktor.client.engine.android.** { *; }

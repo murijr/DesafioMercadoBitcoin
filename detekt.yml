@@ -1,0 +1,111 @@
+# Detekt do projeto (G3). Aplicado SOBRE o default config (buildUponDefaultConfig = true),
+# portanto este arquivo contem apenas o que o projeto aperta ou ajusta ao dialeto.
+# Nada aqui pode ser usado para silenciar uma falha: guardrail se corrige no codigo.
+
+build:
+  maxIssues: 0
+
+complexity:
+  active: true
+  CyclomaticComplexMethod:
+    active: true
+    threshold: 8
+  LongMethod:
+    active: true
+    threshold: 30
+  LongParameterList:
+    active: true
+    functionThreshold: 5
+    constructorThreshold: 6
+  NestedBlockDepth:
+    active: true
+    threshold: 3
+  TooManyFunctions:
+    active: true
+    thresholdInFiles: 12
+    thresholdInClasses: 12
+    thresholdInInterfaces: 8
+    ignorePrivate: false
+    ignoreOverridden: true
+    # Composables de tela agrupam varios @Composable privados no mesmo arquivo.
+    ignoreAnnotatedFunctions: ['Composable']
+
+exceptions:
+  active: true
+  # G3: CancellationException nunca pode ser engolida por um catch generico.
+  SwallowedException:
+    active: true
+    ignoredExceptionTypes:
+      - 'InterruptedException'
+      - 'MalformedURLException'
+      - 'NumberFormatException'
+      - 'ParseException'
+    allowedExceptionNameRegex: '_|(ignore|expected).*'
+  TooGenericExceptionCaught:
+    active: true
+    # A fronteira do UseCase e o UNICO ponto onde `catch (Throwable)` e permitido --
+    # `domain/AGENTS.md` prescreve essa implementacao, e SwallowedException + o rethrow
+    # de CancellationException seguem cobrindo o risco real ali. Qualquer outro catch
+    # generico no projeto continua reprovando.
+    excludes: ['**/domain/UseCase.kt']
+    exceptionNames:
+      - 'ArrayIndexOutOfBoundsException'
+      - 'Error'
+      - 'Exception'
+      - 'IndexOutOfBoundsException'
+      - 'NullPointerException'
+      - 'RuntimeException'
+      - 'Throwable'
+    allowedExceptionNameRegex: '_|(ignore|expected).*'
+  ThrowingExceptionsWithoutMessageOrCause:
+    active: true
+  RethrowCaughtException:
+    active: true
+
+naming:
+  active: true
+  FunctionMinLength:
+    active: true
+    minimumFunctionNameLength: 3
+  FunctionNaming:
+    active: true
+    # Composables sao PascalCase por convencao do Compose (D5).
+    ignoreAnnotated: ['Composable']
+  ClassNaming:
+    active: true
+    # Aceita os prefixos de camada BM/DM/VM alem do PascalCase comum.
+    classPattern: '[A-Z][a-zA-Z0-9]*'
+  TopLevelPropertyNaming:
+    active: true
+
+style:
+  active: true
+  WildcardImport:
+    active: true
+    excludeImports: []
+  ForbiddenComment:
+    active: true
+    comments:
+      - reason: 'trabalho pendente nao pode ser mesclado silenciosamente'
+        value: 'TODO:'
+      - reason: 'trabalho pendente nao pode ser mesclado silenciosamente'
+        value: 'FIXME:'
+  MagicNumber:
+    active: true
+    # Tokens de design (cores, espacamentos) sao literais por natureza: a constante
+    # nomeada JA e a definicao do numero. Fora de theme/, a regra segue valendo.
+    excludes: ['**/presentation/theme/**']
+    ignoreNumbers: ['-1', '0', '1', '2']
+    ignoreAnnotated: ['Composable', 'Preview']
+  MaxLineLength:
+    active: true
+    maxLineLength: 120
+  ReturnCount:
+    active: true
+    max: 2
+  UnusedPrivateMember:
+    active: true
+  UseCheckOrError:
+    active: true
+  UseRequire:
+    active: true
