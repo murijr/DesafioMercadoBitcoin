@@ -55,24 +55,14 @@
       "name": "Mercado Bitcoin",
       "slug": "mercado-bitcoin",
       "logo": "https://s2.coinmarketcap.com/static/img/exchanges/64x64/302.png",
-      "description": "Mercado Bitcoin e uma exchange brasileira.",
       "notice": null,
       "countries": [],
       "fiats": ["BRL"],
       "tags": null,
       "type": "",
-      "maker_fee": 0.3,
-      "taker_fee": 0.7,
       "weekly_visits": 456789,
       "spot_volume_usd": 0.0,
-      "spot_volume_last_updated": "2026-08-18T14:45:00.000Z",
-      "urls": {
-        "website": ["https://www.mercadobitcoin.com.br/"],
-        "twitter": [],
-        "blog": [],
-        "chat": [],
-        "fee": []
-      }
+      "spot_volume_last_updated": "2026-08-18T14:45:00.000Z"
     }
   },
   "status": {

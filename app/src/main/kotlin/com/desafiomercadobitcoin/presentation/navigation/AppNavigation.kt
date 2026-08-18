@@ -9,7 +9,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.desafiomercadobitcoin.presentation.feature.exchangedetail.ExchangeDetailScreen
+import com.desafiomercadobitcoin.presentation.feature.exchangedetail.ExchangeDetailRoute
 import com.desafiomercadobitcoin.presentation.feature.exchangelist.ExchangeListRoute
 
 /**
@@ -41,7 +41,10 @@ fun AppNavigation(
                     )
                 }
                 entry<ExchangeDetailKey> { key ->
-                    ExchangeDetailScreen(exchangeId = key.exchangeId)
+                    ExchangeDetailRoute(
+                        exchangeId = key.exchangeId,
+                        onBackClick = { backStack.removeLastOrNull() },
+                    )
                 }
             },
     )

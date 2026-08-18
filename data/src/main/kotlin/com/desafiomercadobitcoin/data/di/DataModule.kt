@@ -1,9 +1,11 @@
 package com.desafiomercadobitcoin.data.di
 
+import com.desafiomercadobitcoin.data.exchange.ExchangeDetailRepositoryImpl
 import com.desafiomercadobitcoin.data.exchange.ExchangeRemoteDataSource
 import com.desafiomercadobitcoin.data.exchange.ExchangeRepositoryImpl
 import com.desafiomercadobitcoin.data.network.CoinMarketCapConfig
 import com.desafiomercadobitcoin.data.network.HttpClientFactory
+import com.desafiomercadobitcoin.domain.exchange.ExchangeDetailRepository
 import com.desafiomercadobitcoin.domain.exchange.ExchangeRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -38,4 +40,6 @@ fun dataModule(config: CoinMarketCapConfig): Module =
         // `single` porque o índice memoizado precisa sobreviver entre páginas e entre
         // recriações da tela — é o que impede refazer o `map` a cada lote (D1).
         single<ExchangeRepository> { ExchangeRepositoryImpl(get()) }
+        // `factory`: sem estado a memoizar entre chamadas (D3 de `add-exchange-detail`).
+        factory<ExchangeDetailRepository> { ExchangeDetailRepositoryImpl(get()) }
     }

@@ -1,7 +1,10 @@
 package com.desafiomercadobitcoin.data.exchange
 
+import com.desafiomercadobitcoin.data.exchange.api.ExchangeAssetsRoute
 import com.desafiomercadobitcoin.data.exchange.api.ExchangeInfoRoute
 import com.desafiomercadobitcoin.data.exchange.api.ExchangeMapRoute
+import com.desafiomercadobitcoin.data.exchange.dto.DMExchangeAsset
+import com.desafiomercadobitcoin.data.exchange.dto.DMExchangeAssetsResponse
 import com.desafiomercadobitcoin.data.exchange.dto.DMExchangeInfo
 import com.desafiomercadobitcoin.data.exchange.dto.DMExchangeInfoResponse
 import com.desafiomercadobitcoin.data.exchange.dto.DMExchangeMapEntry
@@ -35,6 +38,13 @@ class ExchangeRemoteDataSource(
             .body<DMExchangeInfoResponse>()
             .data
     }
+
+    /** As moedas negociadas por uma corretora. O provedor devolve o conjunto inteiro numa única resposta. */
+    suspend fun loadAssets(exchangeId: Int): List<DMExchangeAsset> =
+        client
+            .get(ExchangeAssetsRoute(id = exchangeId.toString()))
+            .body<DMExchangeAssetsResponse>()
+            .data
 
     companion object {
         const val MAX_IDS_PER_REQUEST: Int = 100

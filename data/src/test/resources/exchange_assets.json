@@ -1,0 +1,53 @@
+{
+  "data": [
+    {
+      "wallet_address": "0x1234567890abcdef",
+      "balance": 1234.5678,
+      "platform": {
+        "crypto_id": 1027,
+        "symbol": "ETH",
+        "name": "Ethereum"
+      },
+      "currency": {
+        "id": 1,
+        "name": "Bitcoin",
+        "symbol": "BTC",
+        "price_usd": 45000.12
+      }
+    },
+    {
+      "wallet_address": "0xabcdef1234567890",
+      "balance": 98765.4321,
+      "platform": {
+        "crypto_id": 1027,
+        "symbol": "ETH",
+        "name": "Ethereum"
+      },
+      "currency": {
+        "id": 1027,
+        "name": "Ethereum",
+        "symbol": "ETH",
+        "price_usd": null
+      }
+    },
+    {
+      "wallet_address": "bc1qxyz",
+      "balance": 0.0,
+      "platform": null,
+      "currency": {
+        "id": 825,
+        "name": "Tether",
+        "symbol": "USDT",
+        "price_usd": 1.0
+      }
+    }
+  ],
+  "status": {
+    "timestamp": "2026-08-18T14:50:03.111Z",
+    "error_code": 0,
+    "error_message": null,
+    "elapsed": 620,
+    "credit_count": 1,
+    "notice": null
+  }
+}

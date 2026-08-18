@@ -5,6 +5,7 @@ import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.navigation3.runtime.NavBackStack
@@ -12,11 +13,16 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.test.core.app.ApplicationProvider
 import com.desafiomercadobitcoin.R
+import com.desafiomercadobitcoin.domain.exchange.GetExchangeCurrenciesUseCase
+import com.desafiomercadobitcoin.domain.exchange.GetExchangeDetailUseCase
 import com.desafiomercadobitcoin.domain.exchange.GetExchangePageUseCase
 import com.desafiomercadobitcoin.domain.exchange.model.BMExchange
+import com.desafiomercadobitcoin.domain.exchange.model.BMExchangeDetail
 import com.desafiomercadobitcoin.domain.exchange.model.BMExchangePage
 import com.desafiomercadobitcoin.presentation.common.AndroidResourceProvider
 import com.desafiomercadobitcoin.presentation.common.ResourceProvider
+import com.desafiomercadobitcoin.presentation.feature.exchangedetail.ExchangeDetailViewModel
+import com.desafiomercadobitcoin.presentation.feature.exchangedetail.TAG_DETAIL_BACK
 import com.desafiomercadobitcoin.presentation.feature.exchangelist.ExchangeListViewModel
 import com.desafiomercadobitcoin.presentation.theme.AppTheme
 import io.mockk.coEvery
@@ -46,6 +52,8 @@ class AppNavigationTest {
 
     private val context = ApplicationProvider.getApplicationContext<Application>()
     private val getExchangePage = mockk<GetExchangePageUseCase>()
+    private val getExchangeDetail = mockk<GetExchangeDetailUseCase>()
+    private val getExchangeCurrencies = mockk<GetExchangeCurrenciesUseCase>()
     private var backPressedOwner: OnBackPressedDispatcherOwner? = null
 
     @Before
@@ -59,12 +67,17 @@ class AppNavigationTest {
                     hasMore = false,
                 ),
             )
+        coEvery { getExchangeDetail.execute(BINANCE_ID) } returns Result.success(detail(BINANCE_ID))
+        coEvery { getExchangeCurrencies.execute(BINANCE_ID) } returns Result.success(emptyList())
         startKoin {
             modules(
                 module {
                     single<ResourceProvider> { AndroidResourceProvider(context) }
                     single { getExchangePage }
+                    single { getExchangeDetail }
+                    single { getExchangeCurrencies }
                     viewModel { ExchangeListViewModel(get(), get(), get()) }
+                    viewModel { ExchangeDetailViewModel(get(), get(), get(), get()) }
                 },
             )
         }
@@ -84,7 +97,7 @@ class AppNavigationTest {
 
         assertEquals(listOf(ExchangeListKey, ExchangeDetailKey(BINANCE_ID)), backStack.toList())
         composeRule
-            .onNodeWithText(context.getString(R.string.exchange_detail_title, BINANCE_ID))
+            .onNodeWithText(context.getString(R.string.exchange_detail_id_format, BINANCE_ID))
             .assertIsDisplayed()
     }
 
@@ -95,6 +108,19 @@ class AppNavigationTest {
         composeRule.waitForIdle()
 
         backPressedDispatcher().onBackPressed()
+        composeRule.waitForIdle()
+
+        assertEquals(listOf<NavKey>(ExchangeListKey), backStack.toList())
+        composeRule.onNodeWithText("Binance").assertIsDisplayed()
+    }
+
+    @Test
+    fun `given the detail on top when the back button is tapped then it is popped`() {
+        val backStack = renderShell()
+        composeRule.onNodeWithText("Binance").performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithTag(TAG_DETAIL_BACK).performClick()
         composeRule.waitForIdle()
 
         assertEquals(listOf<NavKey>(ExchangeListKey), backStack.toList())
@@ -149,6 +175,18 @@ class AppNavigationTest {
         spotVolumeUsd = null,
         dateLaunched = null,
     )
+
+    private fun detail(id: Int) =
+        BMExchangeDetail(
+            id = id,
+            name = "Binance",
+            logoUrl = null,
+            description = null,
+            websiteUrl = null,
+            makerFee = null,
+            takerFee = null,
+            dateLaunched = null,
+        )
 }
 
 private const val BINANCE_ID = 270

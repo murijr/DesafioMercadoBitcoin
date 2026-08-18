@@ -119,6 +119,7 @@ dependencies {
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.tooling.preview)
@@ -133,6 +134,8 @@ dependencies {
     implementation(libs.coil.network.ktor3)
     implementation(libs.koin.android)
     implementation(libs.koin.compose.viewmodel)
+    implementation(libs.mikepenz.markdown.core)
+    implementation(libs.mikepenz.markdown.m3)
     // Coil traz ktor-client-core 3.1.0 transitivamente; declarar aqui alinha o compile
     // classpath a versao que :data ja usa em runtime.
     implementation(libs.ktor.client.core)

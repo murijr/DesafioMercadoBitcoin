@@ -1,6 +1,7 @@
 package com.desafiomercadobitcoin.data.di
 
 import com.desafiomercadobitcoin.data.network.CoinMarketCapConfig
+import com.desafiomercadobitcoin.domain.exchange.ExchangeDetailRepository
 import com.desafiomercadobitcoin.domain.exchange.ExchangeRepository
 import io.ktor.client.HttpClient
 import org.junit.After
@@ -43,6 +44,13 @@ class DataModuleTest {
         val koin = startGraph()
 
         assertNotNull(koin.get<ExchangeRepository>())
+    }
+
+    @Test
+    fun `given the data module when the graph starts then the exchange detail repository is resolvable`() {
+        val koin = startGraph()
+
+        assertNotNull(koin.get<ExchangeDetailRepository>())
     }
 
     private fun startGraph() =

@@ -5,8 +5,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.desafiomercadobitcoin.data.di.dataModule
 import com.desafiomercadobitcoin.data.network.CoinMarketCapConfig
+import com.desafiomercadobitcoin.domain.exchange.GetExchangeCurrenciesUseCase
+import com.desafiomercadobitcoin.domain.exchange.GetExchangeDetailUseCase
 import com.desafiomercadobitcoin.domain.exchange.GetExchangePageUseCase
 import com.desafiomercadobitcoin.presentation.common.ResourceProvider
+import com.desafiomercadobitcoin.presentation.feature.exchangedetail.ExchangeDetailViewModel
 import com.desafiomercadobitcoin.presentation.feature.exchangelist.ExchangeListViewModel
 import org.junit.After
 import org.junit.Assert.assertNotNull
@@ -65,6 +68,17 @@ class AppGraphTest {
     }
 
     @Test
+    fun `given the started graph when the exchange detail view model is requested then it is provided`() {
+        val koin =
+            startKoin {
+                androidContext(ApplicationProvider.getApplicationContext<Application>())
+                modules(dataModule(CoinMarketCapConfig(apiKey = "key")), appModule)
+            }.koin
+
+        assertNotNull(koin.get<ExchangeDetailViewModel> { parametersOf(SavedStateHandle()) })
+    }
+
+    @Test
     fun `given the started graph when the exchange use case is requested then it is provided`() {
         val koin =
             startKoin {
@@ -73,6 +87,18 @@ class AppGraphTest {
             }.koin
 
         assertNotNull(koin.get<GetExchangePageUseCase>())
+    }
+
+    @Test
+    fun `given the started graph when the exchange detail use cases are requested then they are provided`() {
+        val koin =
+            startKoin {
+                androidContext(ApplicationProvider.getApplicationContext<Application>())
+                modules(dataModule(CoinMarketCapConfig(apiKey = "key")), appModule)
+            }.koin
+
+        assertNotNull(koin.get<GetExchangeDetailUseCase>())
+        assertNotNull(koin.get<GetExchangeCurrenciesUseCase>())
     }
 
     @Test

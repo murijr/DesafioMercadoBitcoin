@@ -6,7 +6,11 @@
     <string name="exchange_list_retry">Tentar de novo</string>
     <string name="exchange_field_unavailable">Não informado</string>
     <string name="exchange_volume_format">%1$s %2$s</string>
-    <string name="exchange_detail_title">Exchange %1$d</string>
+
+    <string name="exchange_detail_id_format">ID: %1$d</string>
+    <string name="exchange_detail_currencies_title">Moedas negociadas</string>
+    <string name="exchange_detail_currencies_empty">Nenhuma moeda negociada nesta exchange.</string>
+    <string name="exchange_detail_back">Voltar</string>
 
     <string name="error_invalid_input">Dados informados são inválidos.</string>
     <string name="error_not_found">Não encontramos o que você procura.</string>

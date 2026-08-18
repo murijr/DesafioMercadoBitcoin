@@ -87,6 +87,34 @@ class ExchangeRemoteDataSourceTest {
             }
 
         @Test
+        fun `given content with description urls and fees when deserializing then they are captured`() =
+            runTest {
+                val source = dataSource(fixture("exchange_info.json"))
+
+                val content = source.loadInfo(listOf(BINANCE_ID))
+                val binance = content.getValue("$BINANCE_ID")
+
+                assertEquals("Binance e uma exchange de criptomoedas.", binance.description)
+                assertEquals(listOf("https://www.binance.com/"), binance.urls?.website)
+                assertEquals(BINANCE_MAKER_FEE, binance.makerFee)
+                assertEquals(BINANCE_TAKER_FEE, binance.takerFee)
+            }
+
+        @Test
+        fun `given content without description urls and fees when deserializing then they come back absent`() =
+            runTest {
+                val source = dataSource(fixture("exchange_info.json"))
+
+                val content = source.loadInfo(listOf(MERCADO_BITCOIN_ID))
+                val mercadoBitcoin = content.getValue("$MERCADO_BITCOIN_ID")
+
+                assertNull(mercadoBitcoin.description)
+                assertNull(mercadoBitcoin.urls)
+                assertNull(mercadoBitcoin.makerFee)
+                assertNull(mercadoBitcoin.takerFee)
+            }
+
+        @Test
         fun `given a response with an unknown field when deserializing then the field is ignored`() =
             runTest {
                 val source =
@@ -108,6 +136,40 @@ class ExchangeRemoteDataSourceTest {
 
                 assertEquals(1, requests.size)
                 assertEquals(everyKnownId.joinToString(separator = ","), requests.single().url.parameters["id"])
+            }
+
+        @Test
+        fun `given the assets response when loading assets then every currency is deserialized`() =
+            runTest {
+                val source = dataSource(fixture("exchange_assets.json"))
+
+                val assets = source.loadAssets(BINANCE_ID)
+
+                assertEquals(listOf("Bitcoin", "Ethereum", "Tether"), assets.map { it.currency.name })
+                assertEquals("$BINANCE_ID", requests.single().url.parameters["id"])
+            }
+
+        @Test
+        fun `given a currency without price when loading assets then it comes back absent`() =
+            runTest {
+                val source = dataSource(fixture("exchange_assets.json"))
+
+                val assets = source.loadAssets(BINANCE_ID)
+
+                assertNull(assets.single { it.currency.name == "Ethereum" }.currency.priceUsd)
+            }
+
+        @Test
+        fun `given an unknown field in an asset when deserializing then it is ignored`() =
+            runTest {
+                val source =
+                    dataSource(
+                        """{"data":[{"currency":{"name":"Bitcoin","price_usd":1.0,"futureField":true}}]}""",
+                    )
+
+                val assets = source.loadAssets(BINANCE_ID)
+
+                assertEquals("Bitcoin", assets.single().currency.name)
             }
     }
 
@@ -144,12 +206,24 @@ class ExchangeRemoteDataSourceTest {
                 assertTrue(error is IllegalArgumentException)
                 assertTrue(requests.isEmpty())
             }
+
+        @Test
+        fun `given an exchange without currencies when loading assets then it returns an empty list`() =
+            runTest {
+                val source = dataSource("""{"data":[]}""")
+
+                val assets = source.loadAssets(BINANCE_ID)
+
+                assertTrue(assets.isEmpty())
+            }
     }
 }
 
 private const val BINANCE_ID = 270
 private const val BITFINEX_ID = 294
 private const val MERCADO_BITCOIN_ID = 302
+private const val BINANCE_MAKER_FEE = 0.02
+private const val BINANCE_TAKER_FEE = 0.04
 
 /** Presente no indice e ausente do conteudo, de proposito. */
 private const val UNLISTED_ID = 999
