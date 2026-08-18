@@ -72,6 +72,52 @@ class ExchangeDetailRepositoryImplTest {
 
                 assertEquals(listOf("USDD", "Bitcoin"), currencies.map { it.name })
             }
+
+        @Test
+        fun `given the same currency in different casing when loading currencies then it appears once`() =
+            runTest {
+                coEvery { remote.loadAssets(BINANCE_ID) } returns
+                    listOf(asset("Avantis"), asset("avantis"))
+
+                val currencies = repository.loadCurrencies(BINANCE_ID)
+
+                assertEquals(listOf("Avantis"), currencies.map { it.name })
+            }
+
+        @Test
+        fun `given the same currency with surrounding whitespace when loading currencies then it appears once`() =
+            runTest {
+                coEvery { remote.loadAssets(BINANCE_ID) } returns
+                    listOf(asset("Avantis"), asset("  Avantis "))
+
+                val currencies = repository.loadCurrencies(BINANCE_ID)
+
+                assertEquals(listOf("Avantis"), currencies.map { it.name })
+            }
+
+        @Test
+        fun `given the padded variant arrives first when loading currencies then the displayed name has no surrounding whitespace`() =
+            runTest {
+                coEvery { remote.loadAssets(BINANCE_ID) } returns
+                    listOf(asset("  Avantis "), asset("Avantis"))
+
+                val currencies = repository.loadCurrencies(BINANCE_ID)
+
+                assertEquals(listOf("Avantis"), currencies.map { it.name })
+            }
+
+        @Test
+        fun `given case variants the first priceUsd wins when loading currencies`() =
+            runTest {
+                val first = DMExchangeAsset(currency = DMCurrency(name = "Avantis", priceUsd = 1.20))
+                val second = DMExchangeAsset(currency = DMCurrency(name = "avantis", priceUsd = 1.21))
+                coEvery { remote.loadAssets(BINANCE_ID) } returns listOf(first, second)
+
+                val currencies = repository.loadCurrencies(BINANCE_ID)
+
+                assertEquals(listOf("Avantis"), currencies.map { it.name })
+                assertEquals(1.20, currencies.single().priceUsd!!, 0.0001)
+            }
     }
 
     class ErrorPath : TestSetup() {

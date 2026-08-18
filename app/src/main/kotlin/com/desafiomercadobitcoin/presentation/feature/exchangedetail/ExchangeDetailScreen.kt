@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
@@ -122,10 +122,15 @@ private fun LazyListScope.currenciesSection(
         state.currenciesErrorMessage != null ->
             item { CurrenciesError(message = state.currenciesErrorMessage, onEvent = onEvent) }
         state.isCurrenciesEmpty -> item { CurrenciesEmpty() }
-        else ->
-            items(items = state.currencies, key = { it.name }) { currency ->
+        else -> {
+            val names = state.currencies.map { it.name }
+            val uniqueByName = names.toSet().size == names.size
+            itemsIndexed(items = state.currencies, key = { index, currency ->
+                if (uniqueByName) currency.name else "$index-${currency.name}"
+            }) { _, currency ->
                 CurrencyListItem(currency = currency, modifier = Modifier.testTag(TAG_CURRENCIES_LIST))
             }
+        }
     }
 }
 

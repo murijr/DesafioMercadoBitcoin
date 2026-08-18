@@ -23,11 +23,23 @@ class ExchangeDetailRepositoryImpl(
 
     /**
      * O provedor devolve `/v1/exchange/assets` por **carteira**, não por moeda: a mesma
-     * moeda aparece uma vez por carteira que a possui. `distinctBy` reduz para "a *exchange*
-     * negocia esta moeda", que é o que o *spec* pede — sem isso, a mesma moeda repetida quebra
-     * a chave exigida pelo `LazyColumn` na apresentação (confirmado ao vivo contra a API real,
-     * uma *exchange* com `USDD` em mais de uma carteira).
+     * moeda aparece uma vez por carteira que a possui. Reduzimos para "a *exchange* negocia
+     * esta moeda" — sem isso, a mesma moeda repetida quebra a chave exigida pelo `LazyColumn`
+     * na apresentação.
+     *
+     * A comparação é case-insensitive e ignora espaços nas pontas: o *spec* do *payload* é
+     * "mesma moeda" quando o nome é o mesmo ignorando caixa e *whitespace*, e o endpoint já
+     * devolveu variantes como `"USDD"` × `"usdd"` e `"Avantis"` × `"Avantis "` em carteiras
+     * distintas da mesma *exchange* — manter a primeira ocorrência preserva o `priceUsd` da
+     * carteira que o provedor escolheu como canônica. O nome retido é sempre `trim()`ado, mesmo
+     * quando já é o único candidato, pra nunca vazar espaço nas pontas pra apresentação. Ver
+     * `ExchangeDetailRepositoryImplTest` para o caso de regressão.
      */
     override suspend fun loadCurrencies(exchangeId: Int): List<BMCurrency> =
-        remote.loadAssets(exchangeId).map { it.toBM() }.distinctBy { it.name }
+        remote.loadAssets(exchangeId)
+            .map { it.toBM() }
+            .distinctBy { it.name.normalizeForDeduplication() }
+            .map { it.copy(name = it.name.trim()) }
+
+    private fun String.normalizeForDeduplication(): String = trim().lowercase()
 }

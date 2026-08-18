@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -126,6 +127,22 @@ class ExchangeDetailScreenTest {
         scrollTo(hasText("Bitcoin"))
         composeRule.onNodeWithText("Bitcoin").assertIsDisplayed()
         composeRule.onNodeWithText("US$ 45.000,00").assertIsDisplayed()
+    }
+
+    @Test
+    fun `given currencies with duplicate names when rendering then the list does not crash`() {
+        render(
+            VMExchangeDetailState(
+                detail = detail(),
+                currencies = listOf(
+                    VMCurrency(name = "Avantis", priceLabel = "US$ 1,20"),
+                    VMCurrency(name = "Avantis", priceLabel = "US$ 1,21"),
+                ),
+            ),
+        )
+
+        scrollTo(hasText("Avantis"))
+        composeRule.onAllNodesWithText("Avantis").fetchSemanticsNodes()
     }
 
     @Test
