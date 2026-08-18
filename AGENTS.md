@@ -1,0 +1,107 @@
+# AGENTS.md
+
+> **Documentação por módulo.** As regras de cada camada vivem no `AGENTS.md` do módulo — este arquivo só descreve o que **atravessa** o projeto.
+>
+> - [`domain/AGENTS.md`](./domain/AGENTS.md) — UseCases, `DomainError`, prefixo `BM`, fronteira Kotlin puro.
+> - [`data/AGENTS.md`](./data/AGENTS.md) — `RepositoryImpl`, DataSources Ktor, prefixo `DM`, DI da camada.
+> - [`app/AGENTS.md`](./app/AGENTS.md) — Compose, MVI, ViewModel, `ResourceProvider`, G8 no fim da feature.
+
+## Propósito
+
+App Android do desafio **"Quero ser MB"**: consome a **API pública da CoinMarketCap** para listar **exchanges** de criptomoedas e permitir drill-down até os **ativos** negociados em cada corretora.
+
+## Stack
+
+- **UI**: Jetpack Compose + Material 3.
+- **DI**: Koin (sem codegen, módulos explícitos).
+- **Rede**: Ktor Client (`Android` engine) + `kotlinx.serialization`.
+- **Concorrência**: Coroutines + `Flow` / `StateFlow` / `SharedFlow`.
+- **Testes**: JUnit 4 + MockK + Robolectric (JVM com sombra Android) + Espresso/Compose UI Test (instrumentados).
+
+## Princípios (filtro de cada decisão)
+
+- **YAGNI** — não criar abstração, módulo, use case ou DI binding antes de existir um caso de uso concreto. Na dúvida, copie e duplique; refatore no terceiro repetido (rule of three).
+- **KISS** — a solução mais simples que satisfaz o requisito atual. Padrão só existe pra resolver problema; sem problema, sem padrão.
+- **DRY** — duplicação só é proibida quando a **regra de negócio é a mesma**. Coisas que só "parecem" iguais não se unificam — acoplamento prematuro mata manutenção.
+- **SOLID (prático, não dogmático):**
+  - *S* — uma classe, uma razão pra mudar. UseCase orquestra validação + chamada; DataSource faz IO; `RepositoryImpl` mapeia.
+  - *O* — estender via interface/subclasse, nunca editando código existente. `UseCase<I, S>` cresce por subclasses de `doExecute`.
+  - *L* — implementação substituível pela interface sem surpreender o chamador.
+  - *I* — interfaces pequenas e coesas. Repositório com 10 métodos é sinal pra dividir.
+  - *D* — camadas de alto nível não importam nada de camadas inferiores. `:domain` não conhece `:data` nem `:app`; o grafo aponta pra dentro.
+
+Antes de adicionar dependência, abstração ou módulo, pergunte: *"qual problema concreto isso resolve?"*. Sem resposta imediata, não adicione.
+
+## Prática TDD
+
+Toda feature nasce **teste primeiro**: vermelho → verde → refatorar. Aplica-se em ciclo dentro do **módulo-alvo** da regra de negócio (`:domain` para UseCase, priorizando JVM puro; `:data` para integração com DataSource; `:app` para ViewModel/Screen). O PR deve trazer pelo menos um teste do caminho feliz como evidência. UI Compose é testada com `createComposeRule()` via Robolectric (JVM, sem emulador).
+
+A **mecanização** desse processo vive no **G7/G8** (ver Guardrails) — quem decide se o teste nasceu vermelho é quem está escrevendo o código; o orchestrator só verifica que a suíte continua passando.
+
+## Estrutura multi-módulo
+
+Topologia `:domain` (Kotlin puro) → `:data` (android-library) → `:app` (android-application). Setas = "depende de".
+
+```
+:app  ──▶  :data  ──▶  :domain
+```
+
+| Módulo     | Tipo                 | Responsabilidade                                                                |
+|------------|----------------------|---------------------------------------------------------------------------------|
+| `:domain`  | `kotlin-library`     | Entities/Models, interfaces de Repository, UseCases, erros de domínio. Kotlin puro, sem Android SDK. |
+| `:data`    | `android-library`    | Implementações de Repository, DataSources (rede, banco), DTOs, mapeamentos.     |
+| `:app`     | `android-application`| Presentation (Compose, ViewModels), DI wiring (Koin), navegação, recursos, manifest. |
+
+**Por que essa divisão:**
+- `:domain` como Kotlin puro é a proteção mecânica mais barata contra vazamento de framework — se Android SDK entrar aqui, o módulo **falha em compilar**.
+- `:data` separado impede o presentation de conhecer detalhes de transporte (Ktor, Serialization). Trocar HTTP exige mexer só em `:data`.
+- `:app` é o único módulo que conhece `Context`, `Activity`, `Composable` e recursos — onde decisões de plataforma inevitavelmente vivem.
+
+## Prefixos de modelo
+
+Fronteira visível na assinatura da classe; o tipo de retorno já diz em qual camada o objeto vive e em que direção o mapper flui.
+
+- **VM** (ViewModel) — apresentação. `:app/.../presentation/feature/<feature>/`. Nunca cruza pra `:domain`/`:data`.
+- **BM** (BusinessModel) — domínio. `:domain/<feature>/` ou `:domain/model/`. Única representação de negócio que `:domain` e `:data` veem.
+- **DM** (DataModel) — transporte/persistência. `:data/<feature>/dto/` ou `:data/<feature>/model/`. Sempre `@Serializable` quando vêm de JSON.
+
+Mapers: `DM.to(): BM` em `:data/mapper/`; `BM.to(): VM` em `:app/.../presentation/.../mapper/`. **Um único sentido por função de extensão** — nada de `DM.to().to()`.
+
+## Guardrails (proteção do projeto)
+
+A arquitetura é protegida por **mais de um guardrail em camadas** — cada um cobre uma classe diferente de erro. YAGNI também vale aqui: novo guardrail **só** depois de o problema concreto ter aparecido ao menos uma vez.
+
+| # | Nome              | Tipo      | O que protege                                                                  |
+|---|-------------------|-----------|--------------------------------------------------------------------------------|
+| 1 | Gradle            | mecânico  | Topologia `:domain` (Kotlin puro) — Android SDK em `:domain` falha em compilar.|
+| 2 | Konsist           | estático  | Grafo de camadas, prefixos `VM`/`BM`/`DM`, sufixos `Repository`/`Impl`/`UseCase`, fronteiras, regra "ViewModel depende só de UseCases + `ResourceProvider`". Asserts em `:konsistTest/`. |
+| 3 | Detekt            | estático  | Complexidade, LOC, funções/classe, sufixos, wildcards, regra "`CancellationException` re-lançada em `try/catch (Throwable)`". `detekt.yml` na raiz. |
+| 4 | KtLint            | estilo    | `## Estilo` (`:ktlintCheck` em CI; `:ktlintFormat` **só local**). `.editorconfig` na raiz. |
+| 5 | R8 / Proguard     | mecânico  | `keepRules/rules.keep` consistente — `kotlinx-serialization`, Ktor DSL, Koin via reflexão, `@Parcelize`. Falha se `:app:assembleRelease` quebrar ou `ColdStartSmokeTest` falhar. |
+| 6 | Android Lint + Slack Compose | estático | Severidade de `Manifest`/recursos/a11y/`NewApi`/`HardcodedText`, regras `androidx.compose.lint` + `slack-compose-lints` (API design de Composables). `abortOnError = true` em `app/build.gradle.kts`. |
+| 7 | Testes unitários  | mecânico  | `:domain:test` + `:data:testDebugUnitTest` + `:konsistTest` (JVM puro). Vermelho = bloqueia a finalização. |
+| 8 | Execução no fim da feature | processo | O orchestrator (ou humano) roda `./gradlew detekt ktlintCheck :app:lintDebug :konsistTest:test :domain:test :data:testDebugUnitTest` antes de declarar a feature pronta. Ordem: barato → caro. Detalhes em [`app/AGENTS.md`](./app/AGENTS.md). |
+
+**Falha de guardrail = corrigir no código, nunca na configuração.** Nada de `baseline.xml`/`@Suppress`/`--ignore-rules`/`// ktlint-disable`/`disable+=...` pra forçar passar.
+
+## Estilo
+
+- Kotlin official style (`kotlin.code.style=official`).
+- Nomes expressivos — `CreateShortUrlUseCase`, não `CreateShortUrlManager`.
+- Comentários só onde a intenção **não** é óbvia pelo código. Nada de comentário que repete o nome do método.
+- Não introduzir dependência nova sem necessidade clara (YAGNI).
+
+## O que **não** fazer (regras globais)
+
+- Não importar Android SDK dentro de `:domain` (G1 + G2 seguram).
+- Não acessar `Context`, recursos ou `Composable` a partir de `:data` ou `:domain`.
+- Não criar `Repository` "genérico" ou base abstrata antes de ter ≥3 repositórios concretos com necessidade real de compartilhar código.
+- Não criar nova camada (ex.: `core/`, `shared/`, `utils/`) "por organização" — `:domain`/`:data`/`:app` já são organização.
+- Não acoplar UseCase a `CoroutineScope` — quem chama controla o escopo.
+- Não capturar `CancellationException` em `try/catch` genérico sem re-lançá-la.
+- Não introduzir `LiveData`, RxJava, Retrofit, Gson/Moshi, Hilt/Dagger sem decisão explícita — o stack já está fixado.
+- Não desabilitar/suprimir/contornar guardrail pra forçar passar — corrigir a causa no código.
+
+## Idiom/new- Toda documentação gerada pelo agente (.md, comentários, respostas em chat) deve ser escrita em português do Brasil (pt-BR).
+- Nomes de arquivos, chaves YAML, mensagens de commit, identificadores de código e comandos CLI permanecem em inglês. Apenas o conteúdo prose é em pt-BR.
+- Quando citar ferramentas/conceitos com nome consolidado em inglês ("git worktree", "merge", "review"), mantenha o termo em itálico ou entre aspas, sem traduzir.
