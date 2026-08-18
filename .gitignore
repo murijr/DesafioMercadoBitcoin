@@ -1,0 +1,105 @@
+# --- Gradle -----------------------------------------------------------------
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# --- Local config (NÃO versionar) -------------------------------------------
+local.properties
+**/local.properties
+keystore.properties
+
+# --- Android Studio / IntelliJ IDEA ----------------------------------------
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Evita versionar caches específicas, mas permite arquivos de configuração
+# do projeto gerados pelo IDE caso a equipe compartilhe.
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
+
+# --- Builds / Saídas --------------------------------------------------------
+**/build/
+**/release/
+**/outputs/
+**/intermediates/
+**/generated/
+**/tmp/
+
+# --- Native (NDK / CMake) ---------------------------------------------------
+.externalNativeBuild/
+.cxx/
+*.so
+*.obj
+*.exp
+*.lib
+*.pdb
+
+# --- Capturas / Profiling --------------------------------------------------
+captures/
+**/captures/
+.hprof
+
+# --- Arquivos de empacotamento / publicação ---------------------------------
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# --- Logs -------------------------------------------------------------------
+*.log
+hs_err_pid*
+replay_pid*
+
+# --- Keystores / Segredos ---------------------------------------------------
+*.jks
+*.keystore
+*.p12
+*.pfx
+google-services.json
+
+# --- Sistema / SO ------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+$RECYCLE.BIN/
+
+# --- Kotlin / Misc ---------------------------------------------------------
+.kotlin/
+*.hprof
+
+# --- Worktrees / VCS auxiliares --------------------------------------------
+*.swp
+*.swo
+*~
+
+# Added by Spec Kitty CLI (auto-managed)
+.claude/
+.codex/
+.vibe/
+.pi/
+.letta/
+.opencode/
+.windsurf/
+.gemini/
+.cursor/
+.qwen/
+.kilocode/
+.augment/
+.amazonq/
+.kiro/
+.agent/
+.github/copilot/
+.agents/
+.kittify/
+.kittify/skills-manifest.json
+
+# Spec Kitty: charter bundle derived files (auto-added by `charter generate`)
+.kittify\charter\directives.yaml
+.kittify\charter\governance.yaml
+.kittify\charter\metadata.yaml
+/.worktrees/
