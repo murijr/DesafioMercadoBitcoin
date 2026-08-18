@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">DesafioMercadoBitcoin</string>
+
+    <string name="home_title">Exchanges</string>
+    <string name="home_placeholder">Nenhuma exchange carregada ainda.</string>
+
+    <string name="error_invalid_input">Dados informados são inválidos.</string>
+    <string name="error_not_found">Não encontramos o que você procura.</string>
+    <string name="error_network_unavailable">Sem conexão. Verifique sua internet e tente de novo.</string>
+    <string name="error_unexpected_response">A resposta do servidor veio em um formato inesperado.</string>
+    <string name="error_unexpected">Algo deu errado. Tente novamente.</string>
 </resources>
