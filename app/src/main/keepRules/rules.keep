@@ -47,3 +47,28 @@
 # --- Coroutines ----------------------------------------------------------------------
 -keepclassmembers class kotlinx.coroutines.** { volatile <fields>; }
 -dontwarn kotlinx.coroutines.**
+
+# --- Coil ----------------------------------------------------------------------------
+# O fetcher de rede e descoberto por ServiceLoader e o ImageLoader resolve componentes
+# por tipo em runtime; o R8 nao consegue provar esses usos estaticamente.
+-keep class coil3.network.ktor3.internal.KtorNetworkFetcherServiceLoaderTarget { *; }
+-keep,allowobfuscation interface coil3.util.FetcherServiceLoaderTarget
+-keep class * implements coil3.util.FetcherServiceLoaderTarget { *; }
+-keep class * implements coil3.util.DecoderServiceLoaderTarget { *; }
+-dontwarn coil3.**
+
+# --- Navigation 3 --------------------------------------------------------------------
+# A pilha e serializada/desserializada por chave; os decoradores e o entryProvider
+# resolvem entradas por tipo.
+-keep class androidx.navigation3.** { *; }
+-keep class androidx.lifecycle.viewmodel.navigation3.** { *; }
+-dontwarn androidx.navigation3.**
+
+# --- Chaves de rota @Serializable ------------------------------------------------------
+# `rememberNavBackStack` persiste a pilha pelo serializer de cada chave: perder o nome do
+# tipo ou o Companion quebra a restauracao apos morte de processo.
+-keep class com.desafiomercadobitcoin.presentation.navigation.** { *; }
+-keepclassmembers class com.desafiomercadobitcoin.presentation.navigation.** {
+    public static ** INSTANCE;
+    kotlinx.serialization.KSerializer serializer(...);
+}

@@ -1,9 +1,11 @@
 package com.desafiomercadobitcoin.data.di
 
 import com.desafiomercadobitcoin.data.network.CoinMarketCapConfig
+import com.desafiomercadobitcoin.domain.exchange.ExchangeRepository
 import io.ktor.client.HttpClient
 import org.junit.After
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNotSame
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.core.context.startKoin
@@ -22,12 +24,29 @@ class DataModuleTest {
     }
 
     @Test
-    fun `given the data module when the graph starts then the http client is resolvable`() {
-        val koin =
-            startKoin {
-                modules(dataModule(CoinMarketCapConfig(apiKey = "key", isDebug = false)))
-            }.koin
+    fun `given the data module when the graph starts then both http clients are resolvable`() {
+        val koin = startGraph()
 
-        assertNotNull(koin.get<HttpClient>())
+        assertNotNull(koin.get<HttpClient>(apiHttpClient))
+        assertNotNull(koin.get<HttpClient>(imageHttpClient))
     }
+
+    @Test
+    fun `given the data module when the graph starts then the two clients are distinct`() {
+        val koin = startGraph()
+
+        assertNotSame(koin.get<HttpClient>(apiHttpClient), koin.get<HttpClient>(imageHttpClient))
+    }
+
+    @Test
+    fun `given the data module when the graph starts then the exchange repository is resolvable`() {
+        val koin = startGraph()
+
+        assertNotNull(koin.get<ExchangeRepository>())
+    }
+
+    private fun startGraph() =
+        startKoin {
+            modules(dataModule(CoinMarketCapConfig(apiKey = "key", isDebug = false)))
+        }.koin
 }

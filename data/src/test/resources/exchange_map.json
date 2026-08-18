@@ -1,0 +1,48 @@
+{
+  "data": [
+    {
+      "id": 270,
+      "name": "Binance",
+      "slug": "binance",
+      "is_active": 1,
+      "status": "active",
+      "first_historical_data": "2018-04-26T00:45:00.000Z",
+      "last_historical_data": "2026-08-18T14:00:00.000Z"
+    },
+    {
+      "id": 294,
+      "name": "Bitfinex",
+      "slug": "bitfinex",
+      "is_active": 1,
+      "status": "active",
+      "first_historical_data": "2013-04-28T00:00:00.000Z",
+      "last_historical_data": "2026-08-18T14:00:00.000Z"
+    },
+    {
+      "id": 302,
+      "name": "Mercado Bitcoin",
+      "slug": "mercado-bitcoin",
+      "is_active": 1,
+      "status": "active",
+      "first_historical_data": "2014-01-15T00:00:00.000Z",
+      "last_historical_data": "2026-08-18T14:00:00.000Z"
+    },
+    {
+      "id": 999,
+      "name": "Corretora Sem Conteudo",
+      "slug": "corretora-sem-conteudo",
+      "is_active": 1,
+      "status": "active",
+      "first_historical_data": "2020-01-01T00:00:00.000Z",
+      "last_historical_data": "2026-08-18T14:00:00.000Z"
+    }
+  ],
+  "status": {
+    "timestamp": "2026-08-18T14:49:59.963Z",
+    "error_code": 0,
+    "error_message": null,
+    "elapsed": 12,
+    "credit_count": 1,
+    "notice": null
+  }
+}

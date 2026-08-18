@@ -1,10 +1,13 @@
 package com.desafiomercadobitcoin.di
 
 import android.app.Application
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.desafiomercadobitcoin.data.di.dataModule
 import com.desafiomercadobitcoin.data.network.CoinMarketCapConfig
+import com.desafiomercadobitcoin.domain.exchange.GetExchangePageUseCase
 import com.desafiomercadobitcoin.presentation.common.ResourceProvider
+import com.desafiomercadobitcoin.presentation.feature.exchangelist.ExchangeListViewModel
 import org.junit.After
 import org.junit.Assert.assertNotNull
 import org.junit.Before
@@ -13,6 +16,7 @@ import org.junit.runner.RunWith
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
+import org.koin.core.parameter.parametersOf
 import org.koin.test.check.checkModules
 import org.robolectric.RobolectricTestRunner
 
@@ -42,7 +46,33 @@ class AppGraphTest {
         startKoin {
             androidContext(ApplicationProvider.getApplicationContext<Application>())
             modules(dataModule(CoinMarketCapConfig(apiKey = "key")), appModule)
-        }.checkModules()
+        }.checkModules {
+            // O `SavedStateHandle` de um `ViewModel` e criado pela plataforma, nao pelo
+            // grafo: sem instancia declarada, `checkModules` nao teria como resolve-lo.
+            withInstance(SavedStateHandle())
+        }
+    }
+
+    @Test
+    fun `given the started graph when the exchange list view model is requested then it is provided`() {
+        val koin =
+            startKoin {
+                androidContext(ApplicationProvider.getApplicationContext<Application>())
+                modules(dataModule(CoinMarketCapConfig(apiKey = "key")), appModule)
+            }.koin
+
+        assertNotNull(koin.get<ExchangeListViewModel> { parametersOf(SavedStateHandle()) })
+    }
+
+    @Test
+    fun `given the started graph when the exchange use case is requested then it is provided`() {
+        val koin =
+            startKoin {
+                androidContext(ApplicationProvider.getApplicationContext<Application>())
+                modules(dataModule(CoinMarketCapConfig(apiKey = "key")), appModule)
+            }.koin
+
+        assertNotNull(koin.get<GetExchangePageUseCase>())
     }
 
     @Test

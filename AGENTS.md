@@ -134,6 +134,10 @@ Fronteira visível na assinatura da classe; o tipo de retorno já diz em qual ca
 - **BM** (BusinessModel) — domínio. `:domain/<feature>/` ou `:domain/model/`. Única representação de negócio que `:domain` e `:data` veem.
 - **DM** (DataModel) — transporte/persistência. `:data/<feature>/dto/` ou `:data/<feature>/model/`. Sempre `@Serializable` quando vêm de JSON.
 
+**O prefixo é a única marca de camada no nome.** Classe com prefixo `BM`, `DM` ou `VM` não pode terminar em rótulo de camada — `Dto`, `Model`, `Entity`, `Data`, `Payload`, `Body`, `Json` ou `Schema`, em qualquer caixa. `DMExchangeDto` declara "camada de dados" duas vezes, e no dia em que os dois rótulos discordarem o nome passa a mentir. O G2 reprova (`models never repeat their layer in the name suffix`).
+
+Sufixo que descreve a **forma** do dado continua permitido, porque carrega informação que o prefixo não carrega: `DMExchangeMapResponse` (o envelope `{ data: [...] }`) e `DMExchangeMapEntry` (o elemento do array) precisam se distinguir dentro do mesmo *endpoint*.
+
 Mapers: `DM.to(): BM` em `:data/mapper/`; `BM.to(): VM` em `:app/.../presentation/.../mapper/`. **Um único sentido por função de extensão** — nada de `DM.to().to()`.
 
 ## Guardrails (proteção do projeto)
@@ -143,7 +147,7 @@ A arquitetura é protegida por **mais de um guardrail em camadas** — cada um c
 | # | Nome              | Tipo      | O que protege                                                                  |
 |---|-------------------|-----------|--------------------------------------------------------------------------------|
 | 1 | Gradle            | mecânico  | Topologia `:domain` (Kotlin puro) — Android SDK em `:domain` falha em compilar.|
-| 2 | Konsist           | estático  | Grafo de camadas, prefixos `VM`/`BM`/`DM`, sufixos `Repository`/`Impl`/`UseCase`, fronteiras, regra "ViewModel depende só de UseCases + `ResourceProvider`". Asserts em `:konsistTest/`. |
+| 2 | Konsist           | estático  | Grafo de camadas, prefixos `VM`/`BM`/`DM`, proibição de rótulo de camada no fim do nome, sufixos `Repository`/`Impl`/`UseCase`, fronteiras, regra "ViewModel depende só de UseCases + `ResourceProvider`". Asserts em `:konsistTest/`. |
 | 3 | Detekt            | estático  | Complexidade, LOC, funções/classe, sufixos, wildcards, regra "`CancellationException` re-lançada em `try/catch (Throwable)`". `detekt.yml` na raiz. |
 | 4 | KtLint            | estilo    | `## Estilo` (`:ktlintCheck` em CI; `:ktlintFormat` **só local**). `.editorconfig` na raiz. |
 | 5 | R8 / Proguard     | mecânico  | `keepRules/rules.keep` consistente — `kotlinx-serialization`, Ktor DSL, Koin via reflexão, `@Parcelize`. Falha se `:app:assembleRelease` quebrar ou `ColdStartSmokeTest` falhar. |

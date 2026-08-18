@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.desafiomercadobitcoin.presentation.HomeScreen
+import com.desafiomercadobitcoin.presentation.navigation.AppNavigation
 import com.desafiomercadobitcoin.presentation.theme.AppTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AppTheme {
-                HomeScreen()
+                AppNavigation()
             }
         }
     }

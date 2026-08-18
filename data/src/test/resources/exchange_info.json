@@ -1,0 +1,86 @@
+{
+  "data": {
+    "270": {
+      "id": 270,
+      "name": "Binance",
+      "slug": "binance",
+      "logo": "https://s2.coinmarketcap.com/static/img/exchanges/64x64/270.png",
+      "description": "Binance e uma exchange de criptomoedas.",
+      "date_launched": "2017-07-14T00:00:00.000Z",
+      "notice": null,
+      "countries": [],
+      "fiats": ["USD", "EUR"],
+      "tags": null,
+      "type": "",
+      "maker_fee": 0.02,
+      "taker_fee": 0.04,
+      "weekly_visits": 12345678,
+      "spot_volume_usd": 5234567890.12,
+      "spot_volume_last_updated": "2026-08-18T14:45:00.000Z",
+      "urls": {
+        "website": ["https://www.binance.com/"],
+        "twitter": ["https://twitter.com/binance"],
+        "blog": [],
+        "chat": [],
+        "fee": ["https://www.binance.com/en/fee/schedule"]
+      }
+    },
+    "294": {
+      "id": 294,
+      "name": "Bitfinex",
+      "slug": "bitfinex",
+      "logo": "https://s2.coinmarketcap.com/static/img/exchanges/64x64/294.png",
+      "description": "Bitfinex e uma exchange de criptomoedas.",
+      "date_launched": "2012-10-01T00:00:00.000Z",
+      "notice": null,
+      "countries": [],
+      "fiats": ["USD"],
+      "tags": null,
+      "type": "",
+      "maker_fee": 0.1,
+      "taker_fee": 0.2,
+      "weekly_visits": 987654,
+      "spot_volume_usd": null,
+      "spot_volume_last_updated": null,
+      "urls": {
+        "website": ["https://www.bitfinex.com/"],
+        "twitter": [],
+        "blog": [],
+        "chat": [],
+        "fee": []
+      }
+    },
+    "302": {
+      "id": 302,
+      "name": "Mercado Bitcoin",
+      "slug": "mercado-bitcoin",
+      "logo": "https://s2.coinmarketcap.com/static/img/exchanges/64x64/302.png",
+      "description": "Mercado Bitcoin e uma exchange brasileira.",
+      "notice": null,
+      "countries": [],
+      "fiats": ["BRL"],
+      "tags": null,
+      "type": "",
+      "maker_fee": 0.3,
+      "taker_fee": 0.7,
+      "weekly_visits": 456789,
+      "spot_volume_usd": 0.0,
+      "spot_volume_last_updated": "2026-08-18T14:45:00.000Z",
+      "urls": {
+        "website": ["https://www.mercadobitcoin.com.br/"],
+        "twitter": [],
+        "blog": [],
+        "chat": [],
+        "fee": []
+      }
+    }
+  },
+  "status": {
+    "timestamp": "2026-08-18T14:50:03.111Z",
+    "error_code": 0,
+    "error_message": null,
+    "elapsed": 980,
+    "credit_count": 1,
+    "notice": null
+  }
+}

@@ -13,12 +13,25 @@ import com.desafiomercadobitcoin.domain.error.TextKey
  */
 interface ResourceProvider {
     fun resolve(key: TextKey): String
+
+    /**
+     * Texto que nasce na apresentacao e nao tem chave de dominio — rotulo de campo
+     * indisponivel, molde de formatacao. O `ViewModel` precisa dele para publicar texto
+     * ja resolvido, como o `app-shell` exige.
+     */
+    fun resolve(
+        @StringRes id: Int,
+    ): String
 }
 
 class AndroidResourceProvider(
     private val context: Context,
 ) : ResourceProvider {
     override fun resolve(key: TextKey): String = context.getString(key.toStringRes())
+
+    override fun resolve(
+        @StringRes id: Int,
+    ): String = context.getString(id)
 }
 
 /**

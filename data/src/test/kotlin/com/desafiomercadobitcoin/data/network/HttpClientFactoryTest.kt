@@ -17,6 +17,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.Serializable
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.experimental.runners.Enclosed
@@ -27,6 +29,12 @@ import java.io.IOException
 class HttpClientFactoryTest {
     abstract class TestSetup {
         protected val config = CoinMarketCapConfig(apiKey = "the-secret-key", isDebug = false)
+
+        protected suspend fun errorFrom(status: HttpStatusCode): Throwable? {
+            val client = HttpClientFactory.create(MockEngine { respondError(status) }, config)
+
+            return runCatching { client.get("v1/exchange") }.exceptionOrNull()
+        }
 
         protected fun clientRespondingJson(payload: String) =
             HttpClientFactory.create(
@@ -65,6 +73,39 @@ class HttpClientFactoryTest {
             }
 
         @Test
+        fun `given the image client when a request is issued then it carries no api key header`() =
+            runTest {
+                var sentKey: String? = "nao-lido"
+                val client =
+                    HttpClientFactory.createImageClient(
+                        MockEngine { request ->
+                            sentKey = request.headers[CoinMarketCapConfig.API_KEY_HEADER]
+                            respond("", HttpStatusCode.OK)
+                        },
+                    )
+
+                client.get("https://s2.coinmarketcap.com/static/img/exchanges/64x64/270.png")
+
+                assertNull(sentKey)
+            }
+
+        @Test
+        fun `given the image client when the host refuses the image then no domain error is raised`() =
+            runTest {
+                val client =
+                    HttpClientFactory.createImageClient(
+                        MockEngine { respondError(HttpStatusCode.NotFound) },
+                    )
+
+                val error =
+                    runCatching {
+                        client.get("https://s2.coinmarketcap.com/static/img/exchanges/64x64/1.png")
+                    }.exceptionOrNull()
+
+                assertFalse(error is DomainError)
+            }
+
+        @Test
         fun `given a response with an unknown field when deserializing then the field is ignored`() =
             runTest {
                 val client = clientRespondingJson("""{"name":"Binance","unknownFuture":42}""")
@@ -98,17 +139,43 @@ class HttpClientFactoryTest {
             }
 
         @Test
-        fun `given an http error status when requesting then fails with a domain error`() =
+        fun `given a missing or refused api key when requesting then fails with Network`() =
             runTest {
-                val client =
-                    HttpClientFactory.create(
-                        MockEngine { respondError(HttpStatusCode.InternalServerError) },
-                        config,
-                    )
+                val error = errorFrom(HttpStatusCode.Unauthorized)
 
-                val error = runCatching { client.get("v1/exchange") }.exceptionOrNull()
+                assertEquals(DomainError.Network, error)
+            }
 
-                assertTrue(error is DomainError)
+        @Test
+        fun `given a forbidden response when requesting then fails with Network`() =
+            runTest {
+                val error = errorFrom(HttpStatusCode.Forbidden)
+
+                assertEquals(DomainError.Network, error)
+            }
+
+        @Test
+        fun `given the call limit is exceeded when requesting then fails with Network`() =
+            runTest {
+                val error = errorFrom(HttpStatusCode.TooManyRequests)
+
+                assertEquals(DomainError.Network, error)
+            }
+
+        @Test
+        fun `given a missing resource when requesting then fails with NotFound`() =
+            runTest {
+                val error = errorFrom(HttpStatusCode.NotFound)
+
+                assertEquals(DomainError.NotFound, error)
+            }
+
+        @Test
+        fun `given a server failure when requesting then fails with Network`() =
+            runTest {
+                val error = errorFrom(HttpStatusCode.InternalServerError)
+
+                assertEquals(DomainError.Network, error)
             }
 
         @Test

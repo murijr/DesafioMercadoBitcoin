@@ -1,8 +1,12 @@
 <resources>
     <string name="app_name">DesafioMercadoBitcoin</string>
 
-    <string name="home_title">Exchanges</string>
-    <string name="home_placeholder">Nenhuma exchange carregada ainda.</string>
+    <string name="exchange_list_title">Exchanges</string>
+    <string name="exchange_list_empty">Nenhuma exchange ativa no catálogo.</string>
+    <string name="exchange_list_retry">Tentar de novo</string>
+    <string name="exchange_field_unavailable">Não informado</string>
+    <string name="exchange_volume_format">%1$s %2$s</string>
+    <string name="exchange_detail_title">Exchange %1$d</string>
 
     <string name="error_invalid_input">Dados informados são inválidos.</string>
     <string name="error_not_found">Não encontramos o que você procura.</string>

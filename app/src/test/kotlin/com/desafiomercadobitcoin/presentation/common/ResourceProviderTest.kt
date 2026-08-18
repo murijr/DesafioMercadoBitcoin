@@ -2,9 +2,11 @@ package com.desafiomercadobitcoin.presentation.common
 
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
+import com.desafiomercadobitcoin.R
 import com.desafiomercadobitcoin.domain.error.DomainError
 import com.desafiomercadobitcoin.domain.error.TextKey
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,6 +37,19 @@ class ResourceProviderTest {
         keys.forEach { key ->
             assertFalse("chave sem traducao: $key", provider.resolve(key).isBlank())
         }
+    }
+
+    @Test
+    fun `given a string resource when resolving it then the localized text comes back`() {
+        val text = provider.resolve(R.string.exchange_field_unavailable)
+
+        assertEquals(
+            ApplicationProvider
+                .getApplicationContext<Application>()
+                .getString(R.string.exchange_field_unavailable),
+            text,
+        )
+        assertFalse(text.isBlank())
     }
 
     @Test
