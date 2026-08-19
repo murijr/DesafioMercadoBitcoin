@@ -122,6 +122,33 @@ Exige dispositivo ou emulador conectado, então roda **fora** do comando de G8 �
 
 O caminho correto é **buscar a solução apropriada para o problema** — não enfraquecer a regra.
 
+## G10 — StrictMode na main thread (debug)
+
+`DesafioApplication.onCreate` instala, **antes** do `startKoin` e **apenas** sob `BuildConfig.DEBUG`, uma `StrictMode.ThreadPolicy` que detecta na *main thread*:
+
+- leitura em disco (`detectDiskReads`),
+- escrita em disco (`detectDiskWrites`),
+- acesso à rede (`detectNetwork`),
+
+com `penaltyLog()` **e** `penaltyDeath()`. O log carrega o rastro de pilha do ponto infrator; a morte do processo é o que faz a violação ser corrigida em vez de ignorada. Instalada antes do grafo de propósito: a montagem do Koin também fica sob a política.
+
+Cobre a classe de erro que nenhum dos outros nove guardrails enxerga — I/O na *main thread* atravessa Detekt, Konsist, Lint e a suíte inteira em verde, e só aparece no aparelho do usuário como *jank* de rolagem ou ANR.
+
+**Nunca em release**: `penaltyDeath` em produção transformaria problema de performance em falha para o usuário final.
+
+### Verificação em duas frentes
+
+| Frente | Onde roda | O que prova |
+|---|---|---|
+| `DesafioApplicationTest` (Robolectric) | comando de G8 (`:app:testDebugUnitTest`) | que a política **é instalada** — compara a máscara resultante com a esperada, então remover uma detecção ou rebaixar a penalidade reprova |
+| Suíte instrumentada (G9) | `./gradlew :app:connectedDebugAndroidTest` | que **ninguém a viola** — a fiscalização depende do `BlockGuard` nativo, inerte na JVM; só em dispositivo o `penaltyDeath` mata de verdade |
+
+G10 é o único guardrail de execução: sozinho, não reprova tarefa Gradle nenhuma. Seu poder vem de estar armado dentro do processo que G9 exercita.
+
+### Quando ele dispara
+
+Corrigir **no código**: tirar o I/O da *main thread* (dispatcher de IO), ou delimitar no ponto exato — e só ali — a chamada de plataforma que comprovadamente não sai dela. **Não** remover uma detecção, **não** trocar `penaltyDeath` por `penaltyLog`, **não** envolver o arranque inteiro numa janela permissiva.
+
 ## O que `:app` **não** pode importar
 
 - **Nada** de `:data` para dentro de ViewModel/Screen. ViewModel só conhece `UseCase` e `ResourceProvider`. Mappers e `RepositoryImpl` ficam para a DI.
