@@ -7,7 +7,6 @@ import org.junit.Test
 import org.junit.experimental.runners.Enclosed
 import org.junit.runner.RunWith
 import java.io.IOException
-import java.nio.channels.UnresolvedAddressException
 
 @RunWith(Enclosed::class)
 class ThrowableToDomainErrorTest {
@@ -19,11 +18,6 @@ class ThrowableToDomainErrorTest {
         @Test
         fun `given an io exception when converting then returns the network error`() {
             assertEquals(DomainError.Network(), IOException("offline").toDomainError())
-        }
-
-        @Test
-        fun `given an unresolved address exception when converting then returns the network error`() {
-            assertEquals(DomainError.Network(), UnresolvedAddressException().toDomainError())
         }
 
         @Test

@@ -36,7 +36,8 @@ class ExchangeDetailRepositoryImpl(
      * `ExchangeDetailRepositoryImplTest` para o caso de regressão.
      */
     override suspend fun loadCurrencies(exchangeId: Int): List<BMCurrency> =
-        remote.loadAssets(exchangeId)
+        remote
+            .loadAssets(exchangeId)
             .map { it.toBM() }
             .distinctBy { it.name.normalizeForDeduplication() }
             .map { it.copy(name = it.name.trim()) }

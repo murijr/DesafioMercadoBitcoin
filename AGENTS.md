@@ -14,7 +14,7 @@ App Android do desafio **"Quero ser MB"**: consome a **API pública da CoinMarke
 
 - **UI**: Jetpack Compose + Material 3.
 - **DI**: Koin (sem codegen, módulos explícitos).
-- **Rede**: Ktor Client (`Android` engine) + `kotlinx.serialization`.
+- **Rede**: Ktor Client (engine `OkHttp`) + `kotlinx.serialization`.
 - **Concorrência**: Coroutines + `Flow` / `StateFlow` / `SharedFlow`.
 - **Testes**: JUnit 4 + MockK + Robolectric (JVM com sombra Android) + Espresso/Compose UI Test (instrumentados).
 

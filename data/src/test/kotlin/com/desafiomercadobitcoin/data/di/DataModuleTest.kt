@@ -8,16 +8,9 @@ import org.junit.After
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNotSame
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
-import org.robolectric.RobolectricTestRunner
 
-/**
- * Roda sob Robolectric porque o engine `Android` do Ktor precisa do runtime Android
- * (JVM com sombra, sem emulador — G7).
- */
-@RunWith(RobolectricTestRunner::class)
 class DataModuleTest {
     @After
     fun tearDown() {

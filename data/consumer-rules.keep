@@ -7,5 +7,5 @@
     *** Companion;
 }
 
-# Engine Android do Ktor.
--keep class io.ktor.client.engine.android.** { *; }
+# Engine OkHttp do Ktor.
+-keep class io.ktor.client.engine.okhttp.** { *; }

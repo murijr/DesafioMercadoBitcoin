@@ -96,7 +96,7 @@ class ExchangeDetailRepositoryImplTest {
             }
 
         @Test
-        fun `given the padded variant arrives first when loading currencies then the displayed name has no surrounding whitespace`() =
+        fun `given the padded variant arrives first when loading currencies then the name is trimmed`() =
             runTest {
                 coEvery { remote.loadAssets(BINANCE_ID) } returns
                     listOf(asset("  Avantis "), asset("Avantis"))
@@ -109,14 +109,14 @@ class ExchangeDetailRepositoryImplTest {
         @Test
         fun `given case variants the first priceUsd wins when loading currencies`() =
             runTest {
-                val first = DMExchangeAsset(currency = DMCurrency(name = "Avantis", priceUsd = 1.20))
-                val second = DMExchangeAsset(currency = DMCurrency(name = "avantis", priceUsd = 1.21))
+                val first = DMExchangeAsset(currency = DMCurrency(name = "Avantis", priceUsd = FIRST_PRICE_USD))
+                val second = DMExchangeAsset(currency = DMCurrency(name = "avantis", priceUsd = SECOND_PRICE_USD))
                 coEvery { remote.loadAssets(BINANCE_ID) } returns listOf(first, second)
 
                 val currencies = repository.loadCurrencies(BINANCE_ID)
 
                 assertEquals(listOf("Avantis"), currencies.map { it.name })
-                assertEquals(1.20, currencies.single().priceUsd!!, 0.0001)
+                assertEquals(FIRST_PRICE_USD, currencies.single().priceUsd!!, PRICE_TOLERANCE)
             }
     }
 
@@ -157,3 +157,8 @@ class ExchangeDetailRepositoryImplTest {
 }
 
 private const val BINANCE_ID = 270
+
+// Duas cotacoes proximas: a asercao so passa se a deduplicacao retiver a primeira ocorrencia.
+private const val FIRST_PRICE_USD = 1.20
+private const val SECOND_PRICE_USD = 1.21
+private const val PRICE_TOLERANCE = 0.0001

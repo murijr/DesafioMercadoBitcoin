@@ -8,7 +8,8 @@ import com.desafiomercadobitcoin.data.network.HttpClientFactory
 import com.desafiomercadobitcoin.domain.exchange.ExchangeDetailRepository
 import com.desafiomercadobitcoin.domain.exchange.ExchangeRepository
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
+import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.engine.okhttp.OkHttp
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -20,11 +21,15 @@ val apiHttpClient = named("apiHttpClient")
 val imageHttpClient = named("imageHttpClient")
 
 /**
- * O engine e o **CIO**, e nao o `Android`: o engine `Android` fecha o socket dentro do
- * proprio handler de cancelamento, na thread que cancelou. Como o Coil cancela a carga de
- * uma imagem na main thread quando o item sai da tela, rolar a lista derrubava o processo
- * com `NetworkOnMainThreadException`. O CIO e nao bloqueante e continua sendo Ktor —
- * nenhuma segunda pilha HTTP entra no grafo.
+ * O engine e o **OkHttp**, engine nativo de Android do Ktor: o cancelamento e thread-safe e
+ * nao fecha o socket na thread que cancelou. Como o Coil cancela a carga de uma imagem na
+ * main thread quando o item sai da tela, o engine `Android` derrubava o processo com
+ * `NetworkOnMainThreadException` ao rolar a lista. Sendo engine do Ktor, nenhuma segunda
+ * pilha HTTP entra no grafo.
+ *
+ * O engine e um `single` compartilhado pelos dois clientes: um unico pool de conexoes e um
+ * unico dispatcher no processo. Os `HttpClient` continuam distintos — o que se compartilha
+ * e o transporte, nao a configuracao.
  *
  * Módulo Koin de `:data`. Parametrizado pela configuração do provedor, que vem do `:app` —
  * a camada de dados nunca lê `BuildConfig`.
@@ -34,8 +39,9 @@ val imageHttpClient = named("imageHttpClient")
 fun dataModule(config: CoinMarketCapConfig): Module =
     module {
         single { config }
-        single<HttpClient>(apiHttpClient) { HttpClientFactory.create(CIO.create(), get()) }
-        single<HttpClient>(imageHttpClient) { HttpClientFactory.createImageClient(CIO.create()) }
+        single<HttpClientEngine> { OkHttp.create() }
+        single<HttpClient>(apiHttpClient) { HttpClientFactory.create(get(), get()) }
+        single<HttpClient>(imageHttpClient) { HttpClientFactory.createImageClient(get()) }
         single { ExchangeRemoteDataSource(get(apiHttpClient)) }
         // `single` porque o índice memoizado precisa sobreviver entre páginas e entre
         // recriações da tela — é o que impede refazer o `map` a cada lote (D1).

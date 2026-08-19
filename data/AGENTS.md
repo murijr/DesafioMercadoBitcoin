@@ -46,7 +46,7 @@ Modelos de transporte / persistência. Vivem em `:data/<feature>/dto/` ou `:data
 
 ## HTTP / Ktor
 
-- `HttpClientFactory` em `data/network/`. Único ponto onde o engine (`Android`), plugins (`ContentNegotiation`, `Logging`, `HttpTimeout`), e serialização (`Json`) são montados.
+- `HttpClientFactory` em `data/network/`. Único ponto onde o engine (`OkHttp`), plugins (`ContentNegotiation`, `Logging`, `HttpTimeout`), e serialização (`Json`) são montados.
 - Endpoints definidos em `<feature>/api/` como `@Resource` (type-safe routing do Ktor).
 - API key da CoinMarketCap: leitura de `BuildConfig` do `:app` via injeção — **não** hardcoded em `:data`. Padrão: `data/di` expõe um `CMCAPIClient` (ou similar) já configurado com o header `X-CMC_PRO_API_KEY`.
 
@@ -83,6 +83,6 @@ Convenção completa (Gherkin + Enclosed + Happy/Error) no root.
 
 ## O que `:data` **pode** importar
 
-- Android SDK quando inevitável (engine `Android` do Ktor, `ConnectivityManager` se necessário).
+- Android SDK quando inevitável (engine `OkHttp` do Ktor, `ConnectivityManager` se necessário).
 - `kotlinx-serialization`, `kotlinx-coroutines`.
 - `:domain` (interfaces, `BM`, `DomainError`, `UseCase`).

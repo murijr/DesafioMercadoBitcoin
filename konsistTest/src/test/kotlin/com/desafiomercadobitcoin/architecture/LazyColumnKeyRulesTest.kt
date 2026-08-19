@@ -38,8 +38,7 @@ class LazyColumnKeyRulesTest {
             .functions()
             .filter { function ->
                 function.text.contains("items(") || function.text.contains("itemsIndexed(")
-            }
-            .assertTrue { it.text.contains("key =") }
+            }.assertTrue { it.text.contains("key =") }
     }
 
     /**
@@ -58,17 +57,17 @@ class LazyColumnKeyRulesTest {
         // Indice: `index` ou `i` como parametro, sozinho ou compondo a chave.
         // PK simples via `.id` OU PK composta via `.XxxId` (camelCase terminando em `Id`).
         // Indice: `index` ou `i` como parametro, sozinho ou compondo a chave.
-        val allowedKey = Regex(
-            """key\s*=\s*\{[^}]*(?:\b(?:index|i)\b|\.id\b|\.[A-Za-z][a-zA-Z0-9_]*[Ii]d\b)""",
-        )
+        val allowedKey =
+            Regex(
+                """key\s*=\s*\{[^}]*(?:\b(?:index|i)\b|\.id\b|\.[A-Za-z][a-zA-Z0-9_]*[Ii]d\b)""",
+            )
 
         Konsist
             .scopeFromDirectory("app/src/main")
             .functions()
             .filter { function ->
                 function.text.contains("items(") || function.text.contains("itemsIndexed(")
-            }
-            .assertTrue { function ->
+            }.assertTrue { function ->
                 val text = function.text
                 if (!text.contains("key =")) return@assertTrue true // outra regra cuida disso
                 val keyBlock = Regex("""key\s*=\s*\{[^}]*\}""").find(text)?.value.orEmpty()
