@@ -68,8 +68,9 @@ Modelos de apresentação. Vivem em `:app/.../presentation/feature/<feature>/`. 
 |---|---|
 | Fluxo de State/Effect em resposta a sucesso e erro (ViewModel) | `State.Error`, `Effect.ShowSnackbar` |
 | Renderização + interação (Screen/Composables) via Robolectric | Cobertura do happy path e do error path do ViewModel subjacente |
+| Renderização + interação (Screen/Composables/navegação) via `androidTest`, em dispositivo/emulador real | Mesma cobertura acima, verificada sobre compositor real em vez de sombra JVM (G9) |
 
-UI Compose é testada com `createComposeRule()` via Robolectric (JVM, sem emulador, incluído em G7 se for unit test).
+UI Compose é testada com `createComposeRule()` via Robolectric (JVM, sem emulador, incluído em G7 se for unit test). A mesma cobertura também existe, de forma aditiva, como suíte instrumentada em `src/androidTest` (G9) — nenhuma das duas substitui a outra.
 
 Convenção completa (Gherkin + Enclosed + Happy/Error) no root.
 
@@ -106,6 +107,18 @@ A causa do erro deve ser corrigida no código — **nunca** na configuração do
 - **Não desabilitar checks** (`lintRelease --ignore-rules`, `disable+=...`).
 - **Não substituir regras por versões mais fracas** (`ktlint_official` → `intellij_idea` para "passar").
 - **Não contornar** (`// ktlint-disable`, `// noinspection`).
+
+## G9 — testes instrumentados de tela e componente
+
+Cobre, em `app/src/androidTest`, as mesmas telas e componentes já verificados pela suíte JVM/Robolectric (`ExchangeListScreen`, `ExchangeDetailScreen`, `AppNavigation`, e os componentes `ExchangeListItem`, `ExchangeDetailHeader`, `CurrencyListItem`), mas rodando sobre o compositor e o ciclo de vida reais do Android em vez de uma sombra em JVM. É aditivo a G7: nenhuma das duas suítes substitui a outra.
+
+### Comando
+
+```text
+./gradlew :app:connectedDebugAndroidTest
+```
+
+Exige dispositivo ou emulador conectado, então roda **fora** do comando de G8 — mesma razão de `scripts/release-smoke-check.sh` (G5): instrumentar exige hardware, e G8 é uma suíte JVM (G7). Vermelho bloqueia a finalização da *feature*, do mesmo jeito que G7.
 
 O caminho correto é **buscar a solução apropriada para o problema** — não enfraquecer a regra.
 

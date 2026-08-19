@@ -1,17 +1,19 @@
 package com.desafiomercadobitcoin.presentation.feature.exchangedetail
 
 import android.app.Application
+import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.desafiomercadobitcoin.R
 import com.desafiomercadobitcoin.presentation.feature.exchangedetail.model.VMCurrency
 import com.desafiomercadobitcoin.presentation.feature.exchangedetail.model.VMExchangeDetail
@@ -22,12 +24,16 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.core.context.stopKoin
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
+/**
+ * Versão instrumentada de `ExchangeDetailScreenTest` (G9) — mesmos cenários da suíte JVM/Robolectric
+ * (G7), rodando sobre compositor e dispositivo reais em vez de uma sombra em JVM. As duas suítes
+ * são aditivas: nenhuma substitui a outra.
+ */
+@RunWith(AndroidJUnit4::class)
 class ExchangeDetailScreenTest {
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createAndroidComposeRule<ComponentActivity>()
 
     private val context = ApplicationProvider.getApplicationContext<Application>()
     private val events = mutableListOf<ExchangeDetailEvent>()
@@ -39,14 +45,14 @@ class ExchangeDetailScreenTest {
     }
 
     @Test
-    fun `given any state when rendering then the back button is displayed`() {
+    fun givenAnyStateWhenRenderingThenTheBackButtonIsDisplayed() {
         render(VMExchangeDetailState(isLoadingDetail = true))
 
         composeRule.onNodeWithTag(TAG_DETAIL_BACK).assertIsDisplayed()
     }
 
     @Test
-    fun `given the back button when it is tapped then the back action fires`() {
+    fun givenTheBackButtonWhenItIsTappedThenTheBackActionFires() {
         render(VMExchangeDetailState(isLoadingDetail = true))
 
         composeRule.onNodeWithTag(TAG_DETAIL_BACK).performClick()
@@ -55,14 +61,14 @@ class ExchangeDetailScreenTest {
     }
 
     @Test
-    fun `given the detail is loading when rendering then the loading indicator is displayed`() {
+    fun givenTheDetailIsLoadingWhenRenderingThenTheLoadingIndicatorIsDisplayed() {
         render(VMExchangeDetailState(isLoadingDetail = true))
 
         composeRule.onNodeWithTag(TAG_DETAIL_LOADING).assertIsDisplayed()
     }
 
     @Test
-    fun `given the detail failed when rendering then the message and the retry action are displayed`() {
+    fun givenTheDetailFailedWhenRenderingThenTheMessageAndTheRetryActionAreDisplayed() {
         render(VMExchangeDetailState(detailErrorMessage = "falhou"))
 
         composeRule.onNodeWithTag(TAG_DETAIL_ERROR).assertIsDisplayed()
@@ -71,7 +77,7 @@ class ExchangeDetailScreenTest {
     }
 
     @Test
-    fun `given the detail error when the retry is tapped then the detail retry event is emitted`() {
+    fun givenTheDetailErrorWhenTheRetryIsTappedThenTheDetailRetryEventIsEmitted() {
         render(VMExchangeDetailState(detailErrorMessage = "falhou"))
 
         composeRule.onNodeWithTag(TAG_DETAIL_RETRY).performClick()
@@ -80,7 +86,7 @@ class ExchangeDetailScreenTest {
     }
 
     @Test
-    fun `given the exchange is not found when rendering then the message is displayed without retry`() {
+    fun givenTheExchangeIsNotFoundWhenRenderingThenTheMessageIsDisplayedWithoutRetry() {
         render(VMExchangeDetailState(detailErrorMessage = "nao encontrada", isDetailNotFound = true))
 
         composeRule.onNodeWithTag(TAG_DETAIL_NOT_FOUND).assertIsDisplayed()
@@ -88,7 +94,7 @@ class ExchangeDetailScreenTest {
     }
 
     @Test
-    fun `given the detail when rendering then its fields are displayed`() {
+    fun givenTheDetailWhenRenderingThenItsFieldsAreDisplayed() {
         render(VMExchangeDetailState(detail = detail()))
 
         composeRule.onNodeWithText("Binance").assertIsDisplayed()
@@ -100,7 +106,7 @@ class ExchangeDetailScreenTest {
     }
 
     @Test
-    fun `given currencies loading when rendering then the currencies loading indicator is displayed`() {
+    fun givenCurrenciesLoadingWhenRenderingThenTheCurrenciesLoadingIndicatorIsDisplayed() {
         render(VMExchangeDetailState(detail = detail(), isLoadingCurrencies = true))
 
         scrollTo(hasTestTag(TAG_CURRENCIES_LOADING))
@@ -108,7 +114,7 @@ class ExchangeDetailScreenTest {
     }
 
     @Test
-    fun `given no currencies when rendering then the empty message is displayed`() {
+    fun givenNoCurrenciesWhenRenderingThenTheEmptyMessageIsDisplayed() {
         render(VMExchangeDetailState(detail = detail(), currencies = emptyList()))
 
         scrollTo(hasTestTag(TAG_CURRENCIES_EMPTY))
@@ -116,7 +122,7 @@ class ExchangeDetailScreenTest {
     }
 
     @Test
-    fun `given currencies when rendering then each one is displayed`() {
+    fun givenCurrenciesWhenRenderingThenEachOneIsDisplayed() {
         render(
             VMExchangeDetailState(
                 detail = detail(),
@@ -130,7 +136,7 @@ class ExchangeDetailScreenTest {
     }
 
     @Test
-    fun `given currencies with duplicate names when rendering then the list does not crash`() {
+    fun givenCurrenciesWithDuplicateNamesWhenRenderingThenTheListDoesNotCrash() {
         render(
             VMExchangeDetailState(
                 detail = detail(),
@@ -147,7 +153,7 @@ class ExchangeDetailScreenTest {
     }
 
     @Test
-    fun `given currencies failed when rendering then the message and the retry action are displayed`() {
+    fun givenCurrenciesFailedWhenRenderingThenTheMessageAndTheRetryActionAreDisplayed() {
         render(VMExchangeDetailState(detail = detail(), currenciesErrorMessage = "moedas falharam"))
 
         scrollTo(hasTestTag(TAG_CURRENCIES_ERROR))
@@ -156,7 +162,7 @@ class ExchangeDetailScreenTest {
     }
 
     @Test
-    fun `given currencies error when the retry is tapped then the currencies retry event is emitted`() {
+    fun givenCurrenciesErrorWhenTheRetryIsTappedThenTheCurrenciesRetryEventIsEmitted() {
         render(VMExchangeDetailState(detail = detail(), currenciesErrorMessage = "moedas falharam"))
 
         scrollTo(hasTestTag(TAG_CURRENCIES_RETRY))

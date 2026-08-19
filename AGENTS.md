@@ -153,7 +153,8 @@ A arquitetura é protegida por **mais de um guardrail em camadas** — cada um c
 | 5 | R8 / Proguard     | mecânico  | `keepRules/rules.keep` consistente — `kotlinx-serialization`, Ktor DSL, Koin via reflexão, `@Parcelize`. Falha se `:app:assembleRelease` quebrar ou `ColdStartSmokeTest` falhar. |
 | 6 | Android Lint + Slack Compose | estático | Severidade de `Manifest`/recursos/a11y/`NewApi`/`HardcodedText`, regras `androidx.compose.lint` + `slack-compose-lints` (API design de Composables). `abortOnError = true` em `app/build.gradle.kts`. |
 | 7 | Testes unitários  | mecânico  | `:domain:test` + `:data:testDebugUnitTest` + `:app:testDebugUnitTest` + `:konsistTest:test` (JVM puro, Robolectric sem emulador). Vermelho = bloqueia a finalização. |
-| 8 | Execução no fim da feature | processo | O orchestrator (ou humano) roda `./gradlew detekt ktlintCheck :app:lintDebug :konsistTest:test :domain:test :data:testDebugUnitTest :app:testDebugUnitTest` antes de declarar a feature pronta. Ordem: barato → caro. Detalhes em [`app/AGENTS.md`](./app/AGENTS.md). |
+| 8 | Execução no fim da feature | processo | O orchestrator (ou humano) roda `./gradlew detekt ktlintCheck :app:lintDebug :konsistTest:test :domain:test :data:testDebugUnitTest :app:testDebugUnitTest` antes de declarar a feature pronta. Ordem: barato → caro. Cobre G1–G7, sem emulador. Detalhes em [`app/AGENTS.md`](./app/AGENTS.md). |
+| 9 | Testes instrumentados | mecânico | `./gradlew :app:connectedDebugAndroidTest` — telas e componentes de Compose sobre dispositivo/emulador real, aditivo a G7 (nenhum substitui o outro). Exige dispositivo conectado, então roda **fora** do comando de G8. Vermelho = bloqueia a finalização. Detalhes em [`app/AGENTS.md`](./app/AGENTS.md). |
 
 **Falha de guardrail = corrigir no código, nunca na configuração.** Nada de `baseline.xml`/`@Suppress`/`--ignore-rules`/`// ktlint-disable`/`disable+=...` pra forçar passar.
 
