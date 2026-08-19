@@ -73,17 +73,17 @@ class GetExchangePageUseCaseTest {
 
                 val result = useCase.execute(0)
 
-                assertEquals(DomainError.Network, result.exceptionOrNull())
+                assertEquals(DomainError.Network(), result.exceptionOrNull())
             }
 
         @Test
         fun `given an already typed domain error when execute then it crosses without remapping`() =
             runTest {
-                coEvery { repository.loadPage(0) } throws DomainError.NotFound
+                coEvery { repository.loadPage(0) } throws DomainError.NotFound()
 
                 val result = useCase.execute(0)
 
-                assertEquals(DomainError.NotFound, result.exceptionOrNull())
+                assertEquals(DomainError.NotFound(), result.exceptionOrNull())
             }
 
         @Test

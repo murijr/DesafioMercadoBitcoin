@@ -125,7 +125,7 @@ class HttpClientFactoryTest {
                 val error =
                     runCatching { client.get("v1/exchange").body<SampleDto>() }.exceptionOrNull()
 
-                assertEquals(DomainError.Serialization, error)
+                assertEquals(DomainError.Serialization(), error)
             }
 
         @Test
@@ -135,7 +135,7 @@ class HttpClientFactoryTest {
 
                 val error = runCatching { client.get("v1/exchange") }.exceptionOrNull()
 
-                assertEquals(DomainError.Network, error)
+                assertEquals(DomainError.Network(), error)
             }
 
         @Test
@@ -143,7 +143,7 @@ class HttpClientFactoryTest {
             runTest {
                 val error = errorFrom(HttpStatusCode.Unauthorized)
 
-                assertEquals(DomainError.Network, error)
+                assertEquals(DomainError.Network(), error)
             }
 
         @Test
@@ -151,7 +151,7 @@ class HttpClientFactoryTest {
             runTest {
                 val error = errorFrom(HttpStatusCode.Forbidden)
 
-                assertEquals(DomainError.Network, error)
+                assertEquals(DomainError.Network(), error)
             }
 
         @Test
@@ -159,7 +159,7 @@ class HttpClientFactoryTest {
             runTest {
                 val error = errorFrom(HttpStatusCode.TooManyRequests)
 
-                assertEquals(DomainError.Network, error)
+                assertEquals(DomainError.Network(), error)
             }
 
         @Test
@@ -167,7 +167,7 @@ class HttpClientFactoryTest {
             runTest {
                 val error = errorFrom(HttpStatusCode.NotFound)
 
-                assertEquals(DomainError.NotFound, error)
+                assertEquals(DomainError.NotFound(), error)
             }
 
         @Test
@@ -175,7 +175,7 @@ class HttpClientFactoryTest {
             runTest {
                 val error = errorFrom(HttpStatusCode.InternalServerError)
 
-                assertEquals(DomainError.Network, error)
+                assertEquals(DomainError.Network(), error)
             }
 
         @Test

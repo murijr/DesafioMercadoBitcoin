@@ -129,7 +129,7 @@ class ExchangeDetailViewModelTest {
         fun `given the detail succeeds when currencies fail then the detail remains displayed`() =
             runTest {
                 coEvery { getExchangeDetail.execute(EXCHANGE_ID) } returns Result.success(detail())
-                coEvery { getExchangeCurrencies.execute(EXCHANGE_ID) } returns Result.failure(DomainError.Network)
+                coEvery { getExchangeCurrencies.execute(EXCHANGE_ID) } returns Result.failure(DomainError.Network())
                 val viewModel = viewModel()
 
                 viewModel.send(ExchangeDetailEvent.ScreenOpened)
@@ -141,7 +141,7 @@ class ExchangeDetailViewModelTest {
                         ?.id,
                 )
                 assertEquals(
-                    resources.resolve(DomainError.Network.textKey),
+                    resources.resolve(DomainError.Network().textKey),
                     viewModel.state.value.currenciesErrorMessage,
                 )
             }
@@ -193,7 +193,7 @@ class ExchangeDetailViewModelTest {
         @Test
         fun `given a failed detail retry when it is triggered then the detail is loaded`() =
             runTest {
-                coEvery { getExchangeDetail.execute(EXCHANGE_ID) } returns Result.failure(DomainError.Network)
+                coEvery { getExchangeDetail.execute(EXCHANGE_ID) } returns Result.failure(DomainError.Network())
                 coEvery { getExchangeCurrencies.execute(EXCHANGE_ID) } returns Result.success(emptyList())
                 val viewModel = viewModel()
                 viewModel.send(ExchangeDetailEvent.ScreenOpened)
@@ -215,7 +215,7 @@ class ExchangeDetailViewModelTest {
         fun `given a failed currencies retry when it is triggered then only currencies are loaded again`() =
             runTest {
                 coEvery { getExchangeDetail.execute(EXCHANGE_ID) } returns Result.success(detail())
-                coEvery { getExchangeCurrencies.execute(EXCHANGE_ID) } returns Result.failure(DomainError.Network)
+                coEvery { getExchangeCurrencies.execute(EXCHANGE_ID) } returns Result.failure(DomainError.Network())
                 val viewModel = viewModel()
                 viewModel.send(ExchangeDetailEvent.ScreenOpened)
                 advanceUntilIdle()
@@ -239,7 +239,7 @@ class ExchangeDetailViewModelTest {
         @Test
         fun `given the currencies succeed when the detail fails then no currency list is displayed`() =
             runTest {
-                coEvery { getExchangeDetail.execute(EXCHANGE_ID) } returns Result.failure(DomainError.Network)
+                coEvery { getExchangeDetail.execute(EXCHANGE_ID) } returns Result.failure(DomainError.Network())
                 coEvery { getExchangeCurrencies.execute(EXCHANGE_ID) } returns
                     Result.success(listOf(currency("Bitcoin")))
                 val viewModel = viewModel()
@@ -249,7 +249,7 @@ class ExchangeDetailViewModelTest {
 
                 assertNull(viewModel.state.value.detail)
                 assertEquals(
-                    resources.resolve(DomainError.Network.textKey),
+                    resources.resolve(DomainError.Network().textKey),
                     viewModel.state.value.detailErrorMessage,
                 )
             }
@@ -257,7 +257,7 @@ class ExchangeDetailViewModelTest {
         @Test
         fun `given the detail is not found when the screen opens then the not found state is published`() =
             runTest {
-                coEvery { getExchangeDetail.execute(EXCHANGE_ID) } returns Result.failure(DomainError.NotFound)
+                coEvery { getExchangeDetail.execute(EXCHANGE_ID) } returns Result.failure(DomainError.NotFound())
                 coEvery { getExchangeCurrencies.execute(EXCHANGE_ID) } returns Result.success(emptyList())
                 val viewModel = viewModel()
 
@@ -266,7 +266,7 @@ class ExchangeDetailViewModelTest {
 
                 assertTrue(viewModel.state.value.isDetailNotFound)
                 assertEquals(
-                    resources.resolve(DomainError.NotFound.textKey),
+                    resources.resolve(DomainError.NotFound().textKey),
                     viewModel.state.value.detailErrorMessage,
                 )
             }
@@ -283,7 +283,7 @@ class ExchangeDetailViewModelTest {
                 advanceUntilIdle()
 
                 assertEquals(
-                    resources.resolve(DomainError.Unexpected.textKey),
+                    resources.resolve(DomainError.Unexpected().textKey),
                     viewModel.state.value.detailErrorMessage,
                 )
             }

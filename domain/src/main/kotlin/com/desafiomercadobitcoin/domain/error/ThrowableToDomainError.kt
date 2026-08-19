@@ -14,11 +14,11 @@ fun Throwable.toDomainError(): DomainError =
     when (this) {
         is CancellationException -> throw this
         is DomainError -> this
-        is IOException -> DomainError.Network
+        is IOException -> DomainError.Network()
         // O engine CIO do Ktor resolve o host via NIO: sem DNS/conectividade, lança essa
         // exceção *antes* de qualquer I/O, então ela não é uma IOException.
-        is UnresolvedAddressException -> DomainError.Network
-        else -> if (isSerializationFailure()) DomainError.Serialization else DomainError.Unexpected
+        is UnresolvedAddressException -> DomainError.Network()
+        else -> if (isSerializationFailure()) DomainError.Serialization() else DomainError.Unexpected()
     }
 
 /**

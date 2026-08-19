@@ -52,7 +52,7 @@ class UseCaseTest {
         @Test
         fun `given an already typed domain error when execute then fails with the very same error`() =
             runTest {
-                val expected = DomainError.NotFound
+                val expected = DomainError.NotFound()
 
                 val result = useCaseThrowing(expected).execute("input")
 
@@ -97,7 +97,7 @@ class UseCaseTest {
 
                 val result = useCase.execute("")
 
-                assertEquals(DomainError.Validation, result.exceptionOrNull())
+                assertEquals(DomainError.Validation(), result.exceptionOrNull())
                 coVerify(exactly = 0) { repository.fetch(any()) }
             }
     }
@@ -111,7 +111,7 @@ class ValidatingUseCase(
     private val repository: FakeRepository,
 ) : UseCase<String, String>() {
     override suspend fun doExecute(input: String): String {
-        if (input.isBlank()) throw DomainError.Validation
+        if (input.isBlank()) throw DomainError.Validation()
         return repository.fetch(input)
     }
 }

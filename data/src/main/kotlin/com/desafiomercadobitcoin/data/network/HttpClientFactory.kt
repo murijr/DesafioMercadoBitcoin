@@ -88,8 +88,8 @@ object HttpClientFactory {
     private fun Throwable.toDomainErrorWithStatus(): Throwable =
         when {
             this !is ResponseException -> toDomainError()
-            response.status == HttpStatusCode.NotFound -> DomainError.NotFound
-            else -> DomainError.Network
+            response.status == HttpStatusCode.NotFound -> DomainError.NotFound()
+            else -> DomainError.Network()
         }
 
     fun defaultJson(): Json =

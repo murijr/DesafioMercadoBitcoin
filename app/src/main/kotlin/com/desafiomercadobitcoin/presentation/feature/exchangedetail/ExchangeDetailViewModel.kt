@@ -87,7 +87,7 @@ class ExchangeDetailViewModel(
                     it.copy(
                         isLoadingDetail = false,
                         detailErrorMessage = messageOf(error),
-                        isDetailNotFound = error == DomainError.NotFound,
+                        isDetailNotFound = error == DomainError.NotFound(),
                     )
                 }
             }
@@ -118,7 +118,7 @@ class ExchangeDetailViewModel(
      * é `Throwable` e um erro sem texto seria pior do que "algo deu errado".
      */
     private fun messageOf(error: Throwable): String =
-        resources.resolve((error as? DomainError ?: DomainError.Unexpected).textKey)
+        resources.resolve((error as? DomainError ?: DomainError.Unexpected()).textKey)
 
     companion object {
         const val KEY_EXCHANGE_ID: String = "exchangeId"

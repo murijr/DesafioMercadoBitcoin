@@ -182,22 +182,22 @@ class ExchangeRepositoryImplTest {
         @Test
         fun `given the index request fails when loading a page then the failure propagates`() =
             runTest {
-                coEvery { remote.loadActiveIndex() } throws DomainError.Network
+                coEvery { remote.loadActiveIndex() } throws DomainError.Network()
 
                 val error = runCatching { repository.loadPage(0) }.exceptionOrNull()
 
-                assertEquals(DomainError.Network, error)
+                assertEquals(DomainError.Network(), error)
             }
 
         @Test
         fun `given the content request fails when loading a page then the failure propagates`() =
             runTest {
                 givenIndexOf(BINANCE_ID)
-                coEvery { remote.loadInfo(any()) } throws DomainError.Serialization
+                coEvery { remote.loadInfo(any()) } throws DomainError.Serialization()
 
                 val error = runCatching { repository.loadPage(0) }.exceptionOrNull()
 
-                assertEquals(DomainError.Serialization, error)
+                assertEquals(DomainError.Serialization(), error)
             }
 
         @Test
@@ -213,7 +213,7 @@ class ExchangeRepositoryImplTest {
         @Test
         fun `given a failed index when retrying then the index is requested again`() =
             runTest {
-                coEvery { remote.loadActiveIndex() } throws DomainError.Network
+                coEvery { remote.loadActiveIndex() } throws DomainError.Network()
                 runCatching { repository.loadPage(0) }
                 givenIndexOf(BINANCE_ID)
                 givenContentForEveryRequestedId()

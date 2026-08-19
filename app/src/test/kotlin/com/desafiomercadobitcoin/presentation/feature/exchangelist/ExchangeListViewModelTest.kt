@@ -236,14 +236,14 @@ class ExchangeListViewModelTest {
         @Test
         fun `given the first page fails when the screen is opened then a localized error is published`() =
             runTest {
-                coEvery { getExchangePage.execute(FIRST_PAGE) } returns Result.failure(DomainError.Network)
+                coEvery { getExchangePage.execute(FIRST_PAGE) } returns Result.failure(DomainError.Network())
                 val viewModel = viewModel()
 
                 viewModel.send(ExchangeListEvent.ScreenOpened)
                 advanceUntilIdle()
 
                 assertEquals(
-                    resources.resolve(DomainError.Network.textKey),
+                    resources.resolve(DomainError.Network().textKey),
                     viewModel.state.value.errorMessage,
                 )
                 assertTrue(
@@ -256,7 +256,7 @@ class ExchangeListViewModelTest {
         @Test
         fun `given a failed first page when the retry is triggered then the loading restarts`() =
             runTest {
-                coEvery { getExchangePage.execute(FIRST_PAGE) } returns Result.failure(DomainError.Network)
+                coEvery { getExchangePage.execute(FIRST_PAGE) } returns Result.failure(DomainError.Network())
                 val viewModel = viewModel()
                 viewModel.send(ExchangeListEvent.ScreenOpened)
                 advanceUntilIdle()
@@ -277,7 +277,7 @@ class ExchangeListViewModelTest {
         fun `given a later batch fails when it is loaded then the published items are preserved`() =
             runTest {
                 coEvery { getExchangePage.execute(FIRST_PAGE) } returns Result.success(page(firstBatchIds))
-                coEvery { getExchangePage.execute(SECOND_PAGE) } returns Result.failure(DomainError.Network)
+                coEvery { getExchangePage.execute(SECOND_PAGE) } returns Result.failure(DomainError.Network())
                 val viewModel = viewModel()
                 viewModel.send(ExchangeListEvent.ScreenOpened)
                 advanceUntilIdle()
@@ -292,7 +292,7 @@ class ExchangeListViewModelTest {
                 )
                 assertNull(viewModel.state.value.errorMessage)
                 assertEquals(
-                    resources.resolve(DomainError.Network.textKey),
+                    resources.resolve(DomainError.Network().textKey),
                     viewModel.state.value.pagingErrorMessage,
                 )
             }
@@ -301,7 +301,7 @@ class ExchangeListViewModelTest {
         fun `given a failed later batch when the retry is triggered then only that batch is asked again`() =
             runTest {
                 coEvery { getExchangePage.execute(FIRST_PAGE) } returns Result.success(page(listOf(1)))
-                coEvery { getExchangePage.execute(SECOND_PAGE) } returns Result.failure(DomainError.Network)
+                coEvery { getExchangePage.execute(SECOND_PAGE) } returns Result.failure(DomainError.Network())
                 val viewModel = viewModel()
                 viewModel.send(ExchangeListEvent.ScreenOpened)
                 advanceUntilIdle()
@@ -333,7 +333,7 @@ class ExchangeListViewModelTest {
                 advanceUntilIdle()
 
                 assertEquals(
-                    resources.resolve(DomainError.Unexpected.textKey),
+                    resources.resolve(DomainError.Unexpected().textKey),
                     viewModel.state.value.errorMessage,
                 )
             }

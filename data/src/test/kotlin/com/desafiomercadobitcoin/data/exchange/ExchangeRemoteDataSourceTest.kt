@@ -181,7 +181,7 @@ class ExchangeRemoteDataSourceTest {
 
                 val error = runCatching { source.loadActiveIndex() }.exceptionOrNull()
 
-                assertEquals(DomainError.Serialization, error)
+                assertEquals(DomainError.Serialization(), error)
             }
 
         @Test

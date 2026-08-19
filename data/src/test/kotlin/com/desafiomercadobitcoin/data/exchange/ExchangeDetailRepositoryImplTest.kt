@@ -128,7 +128,7 @@ class ExchangeDetailRepositoryImplTest {
 
                 val error = runCatching { repository.loadDetail(BINANCE_ID) }.exceptionOrNull()
 
-                assertEquals(DomainError.NotFound, error)
+                assertEquals(DomainError.NotFound(), error)
             }
 
         @Test

@@ -18,7 +18,7 @@ class ExchangeDetailRepositoryImpl(
         val content = remote.loadInfo(listOf(exchangeId))
         // Ausência da chave é a única distinção de "id inexistente" que este passo consegue
         // fazer sem depender do 400 genérico do provedor (ver Open Questions do design.md).
-        return content[exchangeId.toString()]?.toDetailBM() ?: throw DomainError.NotFound
+        return content[exchangeId.toString()]?.toDetailBM() ?: throw DomainError.NotFound()
     }
 
     /**

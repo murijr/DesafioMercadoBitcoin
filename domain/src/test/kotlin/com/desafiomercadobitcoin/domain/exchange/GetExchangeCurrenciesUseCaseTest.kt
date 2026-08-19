@@ -55,17 +55,17 @@ class GetExchangeCurrenciesUseCaseTest {
 
                 val result = useCase.execute(1)
 
-                assertEquals(DomainError.Network, result.exceptionOrNull())
+                assertEquals(DomainError.Network(), result.exceptionOrNull())
             }
 
         @Test
         fun `given an already typed domain error when execute then it crosses without remapping`() =
             runTest {
-                coEvery { repository.loadCurrencies(1) } throws DomainError.NotFound
+                coEvery { repository.loadCurrencies(1) } throws DomainError.NotFound()
 
                 val result = useCase.execute(1)
 
-                assertEquals(DomainError.NotFound, result.exceptionOrNull())
+                assertEquals(DomainError.NotFound(), result.exceptionOrNull())
             }
 
         @Test

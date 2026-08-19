@@ -9,13 +9,18 @@ package com.desafiomercadobitcoin.domain.error
 sealed class DomainError(
     val textKey: TextKey,
 ) : Throwable() {
-    data object Validation : DomainError(TextKey.InvalidInput)
+    /** Duas instâncias do mesmo subtipo representam o mesmo erro de negócio. */
+    override fun equals(other: Any?): Boolean = other != null && this::class == other::class
 
-    data object NotFound : DomainError(TextKey.NotFound)
+    override fun hashCode(): Int = this::class.hashCode()
 
-    data object Network : DomainError(TextKey.NetworkUnavailable)
+    class Validation : DomainError(TextKey.InvalidInput)
 
-    data object Serialization : DomainError(TextKey.UnexpectedResponse)
+    class NotFound : DomainError(TextKey.NotFound)
 
-    data object Unexpected : DomainError(TextKey.Unexpected)
+    class Network : DomainError(TextKey.NetworkUnavailable)
+
+    class Serialization : DomainError(TextKey.UnexpectedResponse)
+
+    class Unexpected : DomainError(TextKey.Unexpected)
 }

@@ -54,7 +54,7 @@ class ResourceProviderTest {
 
     @Test
     fun `given a domain error when resolving its key then the user facing text is produced`() {
-        val text = provider.resolve(DomainError.Network.textKey)
+        val text = provider.resolve(DomainError.Network().textKey)
 
         assertFalse(text.isBlank())
     }
