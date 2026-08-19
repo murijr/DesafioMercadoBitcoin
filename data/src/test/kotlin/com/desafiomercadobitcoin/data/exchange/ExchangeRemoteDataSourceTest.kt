@@ -3,6 +3,7 @@ package com.desafiomercadobitcoin.data.exchange
 import com.desafiomercadobitcoin.data.network.CoinMarketCapConfig
 import com.desafiomercadobitcoin.data.network.HttpClientFactory
 import com.desafiomercadobitcoin.domain.error.DomainError
+import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.MockRequestHandleScope
 import io.ktor.client.engine.mock.respond
@@ -31,8 +32,8 @@ class ExchangeRemoteDataSourceTest {
                 "fixtura ausente: $name"
             }.bufferedReader().use { it.readText() }
 
-        protected fun dataSource(payload: String): ExchangeRemoteDataSource =
-            dataSource { request ->
+        protected fun client(payload: String): HttpClient =
+            client { request ->
                 requests += request
                 respond(
                     content = payload,
@@ -41,15 +42,20 @@ class ExchangeRemoteDataSourceTest {
                 )
             }
 
+        protected fun client(
+            handler: suspend MockRequestHandleScope.(HttpRequestData) -> HttpResponseData,
+        ): HttpClient =
+            HttpClientFactory.create(
+                MockEngine { request -> handler(request) },
+                CoinMarketCapConfig(apiKey = "key"),
+            )
+
+        protected fun dataSource(payload: String): ExchangeRemoteDataSource =
+            ExchangeRemoteDataSource(lazy { client(payload) })
+
         protected fun dataSource(
             handler: suspend MockRequestHandleScope.(HttpRequestData) -> HttpResponseData,
-        ): ExchangeRemoteDataSource =
-            ExchangeRemoteDataSource(
-                HttpClientFactory.create(
-                    MockEngine { request -> handler(request) },
-                    CoinMarketCapConfig(apiKey = "key"),
-                ),
-            )
+        ): ExchangeRemoteDataSource = ExchangeRemoteDataSource(lazy { client(handler) })
     }
 
     class HappyPath : TestSetup() {
@@ -215,6 +221,45 @@ class ExchangeRemoteDataSourceTest {
                 val assets = source.loadAssets(BINANCE_ID)
 
                 assertTrue(assets.isEmpty())
+            }
+    }
+
+    /**
+     * Construir o cliente custa a inicializacao do `kotlin-reflect`, pedida pelo
+     * `install(Resources)`. Se ela acontecesse ao resolver esta fonte, cairia na main
+     * thread — e o G10 mata o processo por leitura de disco. Estes dois testes fixam o
+     * momento da construcao; que ela caia no dispatcher de IO so um dispositivo prova (G9).
+     */
+    class ClientConstruction : TestSetup() {
+        @Test
+        fun `given the data source when it is constructed then the client is not built yet`() {
+            var builds = 0
+
+            ExchangeRemoteDataSource(
+                lazy {
+                    builds++
+                    client("""{"data":[]}""")
+                },
+            )
+
+            assertEquals(0, builds)
+        }
+
+        @Test
+        fun `given the data source when the first request is issued then the client is built`() =
+            runTest {
+                var builds = 0
+                val source =
+                    ExchangeRemoteDataSource(
+                        lazy {
+                            builds++
+                            client(fixture("exchange_map.json"))
+                        },
+                    )
+
+                source.loadActiveIndex()
+
+                assertEquals(1, builds)
             }
     }
 }
