@@ -8,9 +8,7 @@ import com.desafiomercadobitcoin.domain.exchange.GetExchangeCurrenciesUseCase
 import com.desafiomercadobitcoin.domain.exchange.GetExchangeDetailUseCase
 import com.desafiomercadobitcoin.presentation.common.ResourceProvider
 import com.desafiomercadobitcoin.presentation.feature.exchangedetail.mapper.toVM
-import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -20,43 +18,34 @@ class ExchangeDetailViewModel(
     private val getExchangeDetail: GetExchangeDetailUseCase,
     private val getExchangeCurrencies: GetExchangeCurrenciesUseCase,
     private val resources: ResourceProvider,
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-    private val mutableState = MutableStateFlow(VMExchangeDetailState())
+    private val mutableState = savedStateHandle.getMutableStateFlow(KEY_EXCHANGE_DETAIL, VMExchangeDetailState())
     val state: StateFlow<VMExchangeDetailState> = mutableState.asStateFlow()
-
-    private val exchangeId: Int
-        get() = checkNotNull(savedStateHandle.get<Int>(KEY_EXCHANGE_ID)) { "exchangeId ausente no SavedStateHandle" }
-
-    fun ensureExchangeId(id: Int) {
-        if (savedStateHandle.get<Int>(KEY_EXCHANGE_ID) == null) {
-            savedStateHandle[KEY_EXCHANGE_ID] = id
-        }
-    }
 
     fun send(event: ExchangeDetailEvent) {
         viewModelScope.launch {
             when (event) {
-                ExchangeDetailEvent.ScreenOpened -> handleScreenOpened()
-                ExchangeDetailEvent.RetryDetailRequested -> loadDetail()
-                ExchangeDetailEvent.RetryCurrenciesRequested -> loadCurrencies()
+                is ExchangeDetailEvent.ScreenOpened -> handleScreenOpened(event.exchangeId)
+                ExchangeDetailEvent.RetryDetailRequested -> loadDetail(requireExchangeId())
+                ExchangeDetailEvent.RetryCurrenciesRequested -> loadCurrencies(requireExchangeId())
             }
         }
     }
 
-    private suspend fun handleScreenOpened() {
+    private suspend fun handleScreenOpened(exchangeId: Int) {
         val current = state.value
-        if (current.isLoadingDetail || current.detail != null) return
+        if (current.exchangeId == exchangeId && (current.isLoadingDetail || current.detail != null)) return
+
+        mutableState.update { it.copy(exchangeId = exchangeId) }
 
         coroutineScope {
-            val detailJob = async { loadDetail() }
-            val currenciesJob = async { loadCurrencies() }
-            detailJob.await()
-            currenciesJob.await()
+            launch { loadDetail(exchangeId) }
+            launch { loadCurrencies(exchangeId) }
         }
     }
 
-    private suspend fun loadDetail() {
+    private suspend fun loadDetail(exchangeId: Int) {
         mutableState.update { it.copy(isLoadingDetail = true, detailErrorMessage = null, isDetailNotFound = false) }
 
         getExchangeDetail
@@ -74,7 +63,7 @@ class ExchangeDetailViewModel(
             }
     }
 
-    private suspend fun loadCurrencies() {
+    private suspend fun loadCurrencies(exchangeId: Int) {
         mutableState.update { it.copy(isLoadingCurrencies = true, currenciesErrorMessage = null) }
 
         getExchangeCurrencies
@@ -94,10 +83,12 @@ class ExchangeDetailViewModel(
             }
     }
 
+    private fun requireExchangeId(): Int = checkNotNull(state.value.exchangeId) { "exchangeId ausente no state" }
+
     private fun messageOf(error: Throwable): String =
         resources.resolve((error as? DomainError ?: DomainError.Unexpected()).textKey)
 
     companion object {
-        const val KEY_EXCHANGE_ID: String = "exchangeId"
+        private const val KEY_EXCHANGE_DETAIL: String = "exchange_detail"
     }
 }

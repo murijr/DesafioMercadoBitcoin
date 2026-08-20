@@ -17,8 +17,7 @@ fun ExchangeDetailRoute(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(viewModel) {
-        viewModel.ensureExchangeId(exchangeId)
-        viewModel.send(ExchangeDetailEvent.ScreenOpened)
+        viewModel.send(ExchangeDetailEvent.ScreenOpened(exchangeId))
     }
 
     ExchangeDetailScreen(state = state, onEvent = viewModel::send, onBackClick = onBackClick, modifier = modifier)

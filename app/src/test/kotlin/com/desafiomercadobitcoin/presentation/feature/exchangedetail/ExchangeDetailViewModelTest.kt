@@ -53,13 +53,8 @@ class ExchangeDetailViewModelTest {
             stopKoin()
         }
 
-        protected fun viewModel(exchangeId: Int = EXCHANGE_ID) =
-            ExchangeDetailViewModel(
-                getExchangeDetail,
-                getExchangeCurrencies,
-                resources,
-                SavedStateHandle(mapOf(ExchangeDetailViewModel.KEY_EXCHANGE_ID to exchangeId)),
-            )
+        protected fun viewModel(savedStateHandle: SavedStateHandle = SavedStateHandle()) =
+            ExchangeDetailViewModel(getExchangeDetail, getExchangeCurrencies, resources, savedStateHandle)
 
         protected fun detail(id: Int = EXCHANGE_ID) =
             BMExchangeDetail(
@@ -79,28 +74,6 @@ class ExchangeDetailViewModelTest {
     @RunWith(RobolectricTestRunner::class)
     class HappyPath : TestSetup() {
         @Test
-        fun `given an empty saved state when the id is ensured then it is stored`() {
-            val savedStateHandle = SavedStateHandle()
-            val viewModel =
-                ExchangeDetailViewModel(getExchangeDetail, getExchangeCurrencies, resources, savedStateHandle)
-
-            viewModel.ensureExchangeId(EXCHANGE_ID)
-
-            assertEquals(EXCHANGE_ID, savedStateHandle.get<Int>(ExchangeDetailViewModel.KEY_EXCHANGE_ID))
-        }
-
-        @Test
-        fun `given an already stored id when a different one is ensured then the original is kept`() {
-            val savedStateHandle = SavedStateHandle(mapOf(ExchangeDetailViewModel.KEY_EXCHANGE_ID to EXCHANGE_ID))
-            val viewModel =
-                ExchangeDetailViewModel(getExchangeDetail, getExchangeCurrencies, resources, savedStateHandle)
-
-            viewModel.ensureExchangeId(EXCHANGE_ID + 1)
-
-            assertEquals(EXCHANGE_ID, savedStateHandle.get<Int>(ExchangeDetailViewModel.KEY_EXCHANGE_ID))
-        }
-
-        @Test
         fun `given the screen is opened when both requests succeed then detail and currencies are published`() =
             runTest {
                 coEvery { getExchangeDetail.execute(EXCHANGE_ID) } returns Result.success(detail())
@@ -108,7 +81,7 @@ class ExchangeDetailViewModelTest {
                     Result.success(listOf(currency("Bitcoin")))
                 val viewModel = viewModel()
 
-                viewModel.send(ExchangeDetailEvent.ScreenOpened)
+                viewModel.send(ExchangeDetailEvent.ScreenOpened(EXCHANGE_ID))
                 advanceUntilIdle()
 
                 assertEquals(
@@ -132,7 +105,7 @@ class ExchangeDetailViewModelTest {
                 coEvery { getExchangeCurrencies.execute(EXCHANGE_ID) } returns Result.failure(DomainError.Network())
                 val viewModel = viewModel()
 
-                viewModel.send(ExchangeDetailEvent.ScreenOpened)
+                viewModel.send(ExchangeDetailEvent.ScreenOpened(EXCHANGE_ID))
                 advanceUntilIdle()
 
                 assertEquals(
@@ -153,7 +126,7 @@ class ExchangeDetailViewModelTest {
                 coEvery { getExchangeCurrencies.execute(EXCHANGE_ID) } returns Result.success(emptyList())
                 val viewModel = viewModel()
 
-                viewModel.send(ExchangeDetailEvent.ScreenOpened)
+                viewModel.send(ExchangeDetailEvent.ScreenOpened(EXCHANGE_ID))
                 advanceUntilIdle()
 
                 assertTrue(viewModel.state.value.isCurrenciesEmpty)
@@ -171,7 +144,7 @@ class ExchangeDetailViewModelTest {
                     Result.success(listOf(currency("Bitcoin")))
                 val viewModel = viewModel()
 
-                viewModel.send(ExchangeDetailEvent.ScreenOpened)
+                viewModel.send(ExchangeDetailEvent.ScreenOpened(EXCHANGE_ID))
                 dispatcher.scheduler.advanceTimeBy(1)
                 dispatcher.scheduler.runCurrent()
 
@@ -196,7 +169,7 @@ class ExchangeDetailViewModelTest {
                 coEvery { getExchangeDetail.execute(EXCHANGE_ID) } returns Result.failure(DomainError.Network())
                 coEvery { getExchangeCurrencies.execute(EXCHANGE_ID) } returns Result.success(emptyList())
                 val viewModel = viewModel()
-                viewModel.send(ExchangeDetailEvent.ScreenOpened)
+                viewModel.send(ExchangeDetailEvent.ScreenOpened(EXCHANGE_ID))
                 advanceUntilIdle()
 
                 coEvery { getExchangeDetail.execute(EXCHANGE_ID) } returns Result.success(detail())
@@ -217,7 +190,7 @@ class ExchangeDetailViewModelTest {
                 coEvery { getExchangeDetail.execute(EXCHANGE_ID) } returns Result.success(detail())
                 coEvery { getExchangeCurrencies.execute(EXCHANGE_ID) } returns Result.failure(DomainError.Network())
                 val viewModel = viewModel()
-                viewModel.send(ExchangeDetailEvent.ScreenOpened)
+                viewModel.send(ExchangeDetailEvent.ScreenOpened(EXCHANGE_ID))
                 advanceUntilIdle()
 
                 coEvery { getExchangeCurrencies.execute(EXCHANGE_ID) } returns
@@ -232,6 +205,30 @@ class ExchangeDetailViewModelTest {
                 )
                 assertNull(viewModel.state.value.currenciesErrorMessage)
             }
+
+        @Test
+        fun `given a state restored from process death when a new view model reads it then the state is kept`() =
+            runTest {
+                coEvery { getExchangeDetail.execute(EXCHANGE_ID) } returns Result.success(detail())
+                coEvery { getExchangeCurrencies.execute(EXCHANGE_ID) } returns
+                    Result.success(listOf(currency("Bitcoin")))
+                val savedStateHandle = SavedStateHandle()
+                viewModel(savedStateHandle).send(ExchangeDetailEvent.ScreenOpened(EXCHANGE_ID))
+                advanceUntilIdle()
+
+                val restored = viewModel(savedStateHandle)
+
+                assertEquals(
+                    EXCHANGE_ID,
+                    restored.state.value.detail
+                        ?.id,
+                )
+                assertEquals(
+                    listOf("Bitcoin"),
+                    restored.state.value.currencies
+                        .map { it.name },
+                )
+            }
     }
 
     @RunWith(RobolectricTestRunner::class)
@@ -244,7 +241,7 @@ class ExchangeDetailViewModelTest {
                     Result.success(listOf(currency("Bitcoin")))
                 val viewModel = viewModel()
 
-                viewModel.send(ExchangeDetailEvent.ScreenOpened)
+                viewModel.send(ExchangeDetailEvent.ScreenOpened(EXCHANGE_ID))
                 advanceUntilIdle()
 
                 assertNull(viewModel.state.value.detail)
@@ -261,7 +258,7 @@ class ExchangeDetailViewModelTest {
                 coEvery { getExchangeCurrencies.execute(EXCHANGE_ID) } returns Result.success(emptyList())
                 val viewModel = viewModel()
 
-                viewModel.send(ExchangeDetailEvent.ScreenOpened)
+                viewModel.send(ExchangeDetailEvent.ScreenOpened(EXCHANGE_ID))
                 advanceUntilIdle()
 
                 assertTrue(viewModel.state.value.isDetailNotFound)
@@ -279,7 +276,7 @@ class ExchangeDetailViewModelTest {
                 coEvery { getExchangeCurrencies.execute(EXCHANGE_ID) } returns Result.success(emptyList())
                 val viewModel = viewModel()
 
-                viewModel.send(ExchangeDetailEvent.ScreenOpened)
+                viewModel.send(ExchangeDetailEvent.ScreenOpened(EXCHANGE_ID))
                 advanceUntilIdle()
 
                 assertEquals(
