@@ -93,7 +93,7 @@ A ordem segue o critério "barato primeiro, caro por último":
 - `detekt` — diff, milissegundos
 - `ktlintCheck` — diff, segundos
 - `:app:lintDebug` — segundos a 30s
-- `:konsistTest:test` — JVM puro, segundos
+- `:konsistTest:test` — JVM puro, ~3min quando o código julgado muda (o Konsist reparsa o repositório inteiro); instantâneo quando não muda
 - `:domain:test` — JVM puro, segundos
 - `:data:testDebugUnitTest` — JVM com Robolectric, ~30s
 - `:app:testDebugUnitTest` — JVM com Robolectric + Compose UI Test, ~1min
