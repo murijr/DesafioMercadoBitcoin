@@ -123,12 +123,14 @@ private fun LazyListScope.currenciesSection(
             item { CurrenciesError(message = state.currenciesErrorMessage, onEvent = onEvent) }
         state.isCurrenciesEmpty -> item { CurrenciesEmpty() }
         else -> {
-            val names = state.currencies.map { it.name }
-            val uniqueByName = names.toSet().size == names.size
-            itemsIndexed(items = state.currencies, key = { index, currency ->
-                if (uniqueByName) currency.name else "$index-${currency.name}"
-            }) { _, currency ->
-                CurrencyListItem(currency = currency, modifier = Modifier.testTag(TAG_CURRENCIES_LIST))
+            itemsIndexed(
+                items = state.currencies,
+                key = { index, currency -> "$index-${currency.name}" },
+            ) { _, currency ->
+                CurrencyListItem(
+                    currency = currency,
+                    modifier = Modifier.testTag(TAG_CURRENCIES_LIST),
+                )
             }
         }
     }

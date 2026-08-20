@@ -6,6 +6,8 @@ import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
 import coil3.network.ktor3.KtorNetworkFetcherFactory
+import coil3.request.crossfade
+import coil3.size.Precision
 import com.desafiomercadobitcoin.data.di.dataModule
 import com.desafiomercadobitcoin.data.di.imageHttpClient
 import com.desafiomercadobitcoin.data.network.CoinMarketCapConfig
@@ -71,6 +73,8 @@ class DesafioApplication :
     override fun newImageLoader(context: PlatformContext): ImageLoader =
         ImageLoader
             .Builder(context)
+            .precision(Precision.EXACT)
+            .crossfade(IMAGE_CROSSFADE_DURATION_MILLIS)
             .components {
                 add(
                     KtorNetworkFetcherFactory(
@@ -79,3 +83,5 @@ class DesafioApplication :
                 )
             }.build()
 }
+
+private const val IMAGE_CROSSFADE_DURATION_MILLIS: Int = 200

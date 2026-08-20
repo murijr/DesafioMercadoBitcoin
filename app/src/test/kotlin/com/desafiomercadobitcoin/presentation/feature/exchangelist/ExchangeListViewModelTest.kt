@@ -33,6 +33,7 @@ import org.junit.experimental.runners.Enclosed
 import org.junit.runner.RunWith
 import org.koin.core.context.stopKoin
 import org.robolectric.RobolectricTestRunner
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(Enclosed::class)
@@ -126,7 +127,7 @@ class ExchangeListViewModelTest {
             runTest {
                 coEvery { getExchangePage.execute(FIRST_PAGE) } returns Result.success(page(listOf(1)))
                 coEvery { getExchangePage.execute(SECOND_PAGE) } coAnswers {
-                    delay(SLOW_ANSWER_MILLIS)
+                    delay(SLOW_ANSWER_MILLIS.milliseconds)
                     Result.success(page(listOf(2), index = SECOND_PAGE))
                 }
                 val viewModel = viewModel()
