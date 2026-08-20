@@ -105,7 +105,7 @@ cmc.api.key=SUA_CHAVE_AQUI
 
 O padrão é **string vazia**: quem clona o repositório compila e roda a suíte G8 inteira sem credencial. A ausência da chave só se manifesta em tempo de execução, como `DomainError.Network` — o build nunca quebra por isso. O valor chega a `:data` por injeção (`CoinMarketCapConfig` no módulo Koin), nunca lido diretamente pela camada de dados.
 
-O SDK do Android vem de `sdk.dir` no mesmo `local.properties`. Em WSL, aponte para um SDK **Linux** — um SDK do Windows (`aapt.exe`) faz o AGP reportar "Build Tools corrupted".
+O SDK do Android vem de `sdk.dir` no mesmo `local.properties`.
 
 ## Estrutura multi-módulo
 
