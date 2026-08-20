@@ -1,6 +1,6 @@
 [versions]
 agp = "9.3.1"
-kotlin = "2.2.10"
+kotlin = "2.3.21"
 
 # AndroidX
 activityCompose = "1.13.0"

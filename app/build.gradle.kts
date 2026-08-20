@@ -1,8 +1,5 @@
 import java.util.Properties
 
-/** Maior `kotlin-stdlib` cuja metadata o compilador Kotlin do projeto consegue ler. */
-val maxReadableKotlinStdlib = "2.3.21"
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -95,21 +92,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-}
-
-/**
- * Coil 3.5.0 declara `kotlin-stdlib:2.4.0`, e a resolucao por maior versao arrastaria a
- * stdlib inteira para la -- cuja metadata o compilador Kotlin 2.2.10 do projeto nao le
- * ("can read versions up to 2.3.0"). O bytecode do proprio Coil e metadata 2.2.0, entao
- * o conflito e so de versao da stdlib.
- *
- * O teto e a maior stdlib legivel pelo compilador, e nao a versao do plugin: descer ate
- * 2.2.10 tira do classpath classes que as bibliotecas mais novas ja referenciam em runtime.
- */
-configurations.configureEach {
-    resolutionStrategy {
-        force("org.jetbrains.kotlin:kotlin-stdlib:$maxReadableKotlinStdlib")
     }
 }
 
