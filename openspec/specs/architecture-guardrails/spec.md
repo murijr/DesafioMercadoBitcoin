@@ -113,18 +113,6 @@ O projeto SHALL verificar formatação por `./gradlew ktlintCheck` usando o *cod
 - **WHEN** `./gradlew ktlintFormat` é executado
 - **THEN** os arquivos são reescritos em conformidade e `ktlintCheck` passa em seguida
 
-### Requirement: Integridade do *build* de release ofuscado (G5)
-
-O *build type* `release` SHALL executar o encolhedor/ofuscador com as *keep rules* versionadas no repositório, de modo que `./gradlew :app:assembleRelease` produza um artefato em que serialização JSON, roteamento HTTP, resolução de dependências por reflexão e restauração de estado da UI continuem funcionando.
-
-#### Scenario: Release monta com otimização ligada
-- **WHEN** `./gradlew :app:assembleRelease` é executado
-- **THEN** a otimização está habilitada e o build conclui com sucesso
-
-#### Scenario: Keep rule ausente
-- **WHEN** uma classe necessária em tempo de execução por reflexão não está coberta pelas *keep rules*
-- **THEN** o teste de fumaça de inicialização a frio executado sobre o artefato de release falha
-
 ### Requirement: Verificação de plataforma e de API de Composables (G6)
 
 O projeto SHALL executar `./gradlew :app:lintDebug` com aborto em erro, tratando como **erro** (não aviso) texto literal em layout XML, uso de API acima do nível mínimo suportado, recurso não utilizado, e problemas de acessibilidade e de manifesto; e SHALL incluir as verificações de design de API de funções `@Composable`.

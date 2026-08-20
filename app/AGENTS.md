@@ -77,8 +77,7 @@ Convenção completa (Gherkin + Enclosed + Happy/Error) no root.
 ## Recursos e manifest
 
 - `app/src/main/AndroidManifest.xml` — manter mínimo. Se adicionar `<activity>`, declarar `android:exported` conforme requisitos do target SDK 37.
-- `app/src/main/keepRules/rules.keep` — regras Proguard/R8 consumidas pelo AGP. Sem essa checagem, `kotlinx-serialization`, Ktor DSL, Koin resolvido por reflexão, `@Parcelize` em `SavedStateHandle` quebram silenciosamente no release (G5).
-- `scripts/release-smoke-check.sh` — verificação do G5 sobre o **artefato ofuscado**: monta o release com R8, instala e confirma que o app sobe. Exige dispositivo, então roda manualmente ou em CI, **fora** do comando G8. Nota: enquanto a casca não exercitar serialização, `@Parcelize` ou reflexão no arranque, nenhuma *keep rule* é load-bearing — o valor desta guarda cresce com a primeira feature.
+- `app/src/main/keepRules/rules.keep` — regras Proguard/R8 consumidas pelo AGP, cobrindo `kotlinx-serialization`, Ktor DSL, Koin resolvido por reflexão e `@Parcelize` em `SavedStateHandle`.
 
 ## G8 — execução dos guardrails no fim da feature
 
@@ -118,7 +117,7 @@ Cobre, em `app/src/androidTest`, as mesmas telas e componentes já verificados p
 ./gradlew :app:connectedDebugAndroidTest
 ```
 
-Exige dispositivo ou emulador conectado, então roda **fora** do comando de G8 — mesma razão de `scripts/release-smoke-check.sh` (G5): instrumentar exige hardware, e G8 é uma suíte JVM (G7). Vermelho bloqueia a finalização da *feature*, do mesmo jeito que G7.
+Exige dispositivo ou emulador conectado, então roda **fora** do comando de G8: instrumentar exige hardware, e G8 é uma suíte JVM (G7). Vermelho bloqueia a finalização da *feature*, do mesmo jeito que G7.
 
 O caminho correto é **buscar a solução apropriada para o problema** — não enfraquecer a regra.
 

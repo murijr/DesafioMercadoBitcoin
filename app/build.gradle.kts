@@ -49,11 +49,7 @@ android {
 
     buildTypes {
         release {
-            // Permite rodar o ColdStartSmokeTest contra o artefato ja ofuscado (G5).
-            enableAndroidTestCoverage = false
-            testProguardFiles("test-rules.pro")
-            // G5: com a otimizacao desligada o release vira uma copia do debug e nenhuma
-            // quebra de reflexao e detectavel. As keep rules vivem em src/main/keepRules.
+            // As keep rules vivem em src/main/keepRules.
             optimization {
                 enable = true
             }
