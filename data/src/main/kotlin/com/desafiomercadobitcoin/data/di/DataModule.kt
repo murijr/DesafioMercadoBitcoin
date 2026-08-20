@@ -42,11 +42,7 @@ fun dataModule(config: CoinMarketCapConfig): Module =
         single<HttpClientEngine> { OkHttp.create() }
         single<HttpClient>(apiHttpClient) { HttpClientFactory.create(get(), get()) }
         single<HttpClient>(imageHttpClient) { HttpClientFactory.createImageClient(get()) }
-        // O cliente entra preguiçoso: resolver esta fonte acontece na composição, na main
-        // thread, e construir o cliente ali arrasta a inicialização do `kotlin-reflect`
-        // (pedida pelo `install(Resources)`) para junto — leitura de disco onde ela custa
-        // mais. Assim ele nasce na primeira requisição, já dentro do dispatcher de IO.
-        single { ExchangeRemoteDataSource(lazy { get<HttpClient>(apiHttpClient) }) }
+        single { ExchangeRemoteDataSource(get(apiHttpClient)) }
         // `single` porque o índice memoizado precisa sobreviver entre páginas e entre
         // recriações da tela — é o que impede refazer o `map` a cada lote (D1).
         single<ExchangeRepository> { ExchangeRepositoryImpl(get()) }

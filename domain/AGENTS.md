@@ -30,17 +30,18 @@ Toda regra de negócio executável vive em um `<Feature>UseCase`. Estende a base
 abstract class UseCase<I, S> {
     protected abstract suspend fun doExecute(input: I): S
 
-    suspend fun execute(input: I): Result<S> {
-        return try {
-            Result.success(doExecute(input))
-        } catch (error: CancellationException) {
-            throw error                                              // não encapsula cancelamento
-        } catch (error: DomainError) {
-            Result.failure(error)                                    // já tipado, sem remapeamento
-        } catch (error: Throwable) {
-            Result.failure(error.toDomainError())                    // mapeia qualquer outra exceção
+    suspend fun execute(input: I): Result<S> =
+        withContext(Dispatchers.Default) {
+            try {
+                Result.success(doExecute(input))
+            } catch (error: CancellationException) {
+                throw error                                              // não encapsula cancelamento
+            } catch (error: DomainError) {
+                Result.failure(error)                                    // já tipado, sem remapeamento
+            } catch (error: Throwable) {
+                Result.failure(error.toDomainError())                    // mapeia qualquer outra exceção
+            }
         }
-    }
 }
 ```
 

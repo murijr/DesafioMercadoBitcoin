@@ -15,6 +15,8 @@ import io.ktor.client.plugins.resources.Resources
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
 /**
@@ -26,36 +28,38 @@ object HttpClientFactory {
         engine: HttpClientEngine,
         config: CoinMarketCapConfig,
     ): HttpClient =
-        HttpClient(engine) {
-            expectSuccess = true
+        runBlocking(Dispatchers.IO) {
+            HttpClient(engine) {
+                expectSuccess = true
 
-            install(Resources)
+                install(Resources)
 
-            install(ContentNegotiation) {
-                json(defaultJson(), contentType = ContentType.Application.Json)
-            }
-
-            install(HttpTimeout) {
-                requestTimeoutMillis = CoinMarketCapConfig.TIMEOUT_MILLIS
-                connectTimeoutMillis = CoinMarketCapConfig.TIMEOUT_MILLIS
-                socketTimeoutMillis = CoinMarketCapConfig.TIMEOUT_MILLIS
-            }
-
-            if (config.isDebug) {
-                install(Logging) {
-                    level = LogLevel.HEADERS
+                install(ContentNegotiation) {
+                    json(defaultJson(), contentType = ContentType.Application.Json)
                 }
-            }
 
-            defaultRequest {
-                url(CoinMarketCapConfig.BASE_URL)
-                headers.append(CoinMarketCapConfig.API_KEY_HEADER, config.apiKey)
-            }
+                install(HttpTimeout) {
+                    requestTimeoutMillis = CoinMarketCapConfig.TIMEOUT_MILLIS
+                    connectTimeoutMillis = CoinMarketCapConfig.TIMEOUT_MILLIS
+                    socketTimeoutMillis = CoinMarketCapConfig.TIMEOUT_MILLIS
+                }
 
-            // Ponto unico de traducao: acima daqui so circula DomainError tipado.
-            HttpResponseValidator {
-                handleResponseExceptionWithRequest { cause, _ ->
-                    throw cause.toDomainErrorWithStatus()
+                if (config.isDebug) {
+                    install(Logging) {
+                        level = LogLevel.HEADERS
+                    }
+                }
+
+                defaultRequest {
+                    url(CoinMarketCapConfig.BASE_URL)
+                    headers.append(CoinMarketCapConfig.API_KEY_HEADER, config.apiKey)
+                }
+
+                // Ponto unico de traducao: acima daqui so circula DomainError tipado.
+                HttpResponseValidator {
+                    handleResponseExceptionWithRequest { cause, _ ->
+                        throw cause.toDomainErrorWithStatus()
+                    }
                 }
             }
         }
@@ -69,11 +73,13 @@ object HttpClientFactory {
      * imagem em `DomainError` dentro do Coil, onde ninguem o trata (D5).
      */
     fun createImageClient(engine: HttpClientEngine): HttpClient =
-        HttpClient(engine) {
-            install(HttpTimeout) {
-                requestTimeoutMillis = CoinMarketCapConfig.TIMEOUT_MILLIS
-                connectTimeoutMillis = CoinMarketCapConfig.TIMEOUT_MILLIS
-                socketTimeoutMillis = CoinMarketCapConfig.TIMEOUT_MILLIS
+        runBlocking(Dispatchers.IO) {
+            HttpClient(engine) {
+                install(HttpTimeout) {
+                    requestTimeoutMillis = CoinMarketCapConfig.TIMEOUT_MILLIS
+                    connectTimeoutMillis = CoinMarketCapConfig.TIMEOUT_MILLIS
+                    socketTimeoutMillis = CoinMarketCapConfig.TIMEOUT_MILLIS
+                }
             }
         }
 

@@ -62,7 +62,7 @@ As respostas JSON SHALL ser desserializadas em modelos de transporte com configu
 
 ### Requirement: Fonte de dados remota faz apenas entrada/saída
 
-Uma fonte de dados remota SHALL apenas configurar e emitir a requisição e devolver o modelo de transporte cru, executando-a no dispatcher de IO da camada. Ela MUST NOT aplicar regra de negócio, validação semântica, nem devolver resultado encapsulado — falhas SHALL ser sinalizadas por lançamento.
+Uma fonte de dados remota SHALL apenas configurar e emitir a requisição e devolver o modelo de transporte cru, executando-a no dispatcher de quem a chama. Ela MUST NOT aplicar regra de negócio, validação semântica, nem devolver resultado encapsulado — falhas SHALL ser sinalizadas por lançamento.
 
 #### Scenario: Retorno cru
 - **WHEN** a requisição é bem-sucedida
@@ -138,21 +138,15 @@ Quando o provedor limita a quantidade de identificadores aceitos por consulta, a
 - **WHEN** a camada recebe um conjunto vazio de identificadores
 - **THEN** nenhuma requisição é emitida e o resultado é um conjunto vazio
 
-### Requirement: IO da camada de dados fora da main thread
+### Requirement: Construção do cliente HTTP fora da main thread
 
-A camada de dados SHALL executar suas operações de entrada/saída em um dispatcher próprio de IO, e MUST NOT depender do dispatcher de quem a chamou. Nenhuma leitura de disco, escrita em disco ou acesso à rede originado por `:data` SHALL ocorrer na *main thread*.
-
-O cliente HTTP SHALL ser construído no **primeiro uso**, dentro do dispatcher de IO, e MUST NOT ser construído durante a resolução do grafo de dependências — que acontece na *main thread*, quando a tela pede seu `ViewModel`. Construir o cliente ali arrasta para a *main thread* todo o custo de inicialização de suas dependências, incluindo o carregamento por reflexão exigido pelo roteamento *type-safe*.
+O cliente HTTP SHALL ser construído dentro de um dispatcher próprio de IO, independente de quando a construção for disparada — inclusive durante a resolução do grafo de dependências, que acontece na *main thread*, quando a tela pede seu `ViewModel`. Sem essa garantia, o custo de inicialização de suas dependências, incluindo o carregamento por reflexão exigido pelo roteamento *type-safe*, cairia na *main thread*.
 
 Esta regra é verificada em execução pelo guardrail de política de *thread* (G10): no *build* de depuração, a violação encerra o processo.
 
-#### Scenario: Requisição não começa na main thread
-- **WHEN** um `ViewModel` invoca um caso de uso que alcança a fonte de dados remota a partir de seu escopo, cujo dispatcher é o da interface
-- **THEN** a operação de entrada/saída é executada no dispatcher de IO da camada de dados, e não naquele dispatcher
-
-#### Scenario: Cliente construído no primeiro uso
+#### Scenario: Cliente não é construído na main thread
 - **WHEN** o grafo de dependências resolve a fonte de dados remota durante a composição da tela
-- **THEN** o cliente HTTP ainda não foi construído, e sua construção ocorre apenas quando a primeira requisição é emitida
+- **THEN** a construção do cliente HTTP roda dentro do dispatcher de IO, não na *main thread* que disparou a resolução
 
 #### Scenario: Arranque sem violação de política de thread
 - **WHEN** `./gradlew :app:connectedDebugAndroidTest` é executado com dispositivo ou emulador conectado

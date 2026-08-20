@@ -27,8 +27,8 @@ Modelos de transporte / persistência. Vivem em `:data/<feature>/dto/` ou `:data
 ## `RemoteDataSource`
 
 - Faz IO. **Só** IO. Sem regra de negócio, sem validação semântica.
-- **O IO roda em `Dispatchers.IO`, nunca no dispatcher de quem chamou.** Quem conhece a natureza da operação é quem a executa; deixar isso para o chamador transformaria a regra em disciplina humana, que é o que os guardrails deste projeto existem para substituir. O `viewModelScope` é `Main.immediate`, então sem o `withContext` o corpo da função começa na *main thread*.
-- Recebe o `HttpClient` via DI (Koin) **preguiçoso** (`Lazy<HttpClient>`), e não já construído. Resolver a fonte de dados acontece na composição, na *main thread*; construir o cliente ali arrasta junto a inicialização do `kotlin-reflect` que o `install(Resources)` pede, e ela lê o APK do disco. Preguiça e `Dispatchers.IO` só resolvem **juntos**: a preguiça sozinha adiaria a leitura para a primeira chamada, que também começa na *main thread*. Quem reprova em execução é o G10 (ver [`app/AGENTS.md`](../app/AGENTS.md)).
+- **A chamada roda no dispatcher de quem chamou.** A proteção contra a main thread é só na construção do `HttpClient`, feita dentro de `Dispatchers.IO` pelo `HttpClientFactory`. Quem reprova em execução é o G10 (ver [`app/AGENTS.md`](../app/AGENTS.md)).
+- Recebe o `HttpClient` via DI (Koin), já construído.
 - Configura o request e devolve o `DM` cru.
 - Converte exceções de transporte (`ResponseException`, `IOException`, `SerializationException`) em `DomainError` via `Throwable.toDomainError()` — **ou** relança como `DomainError.Network`/`DomainError.Serialization` direto, dependendo do ponto.
 - Lança, não retorna `Result`. Quem converte `Throwable` → `Result` é o `UseCase` (ver [`domain/AGENTS.md`](../domain/AGENTS.md)).
