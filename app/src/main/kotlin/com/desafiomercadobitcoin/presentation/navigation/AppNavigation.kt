@@ -12,13 +12,6 @@ import androidx.navigation3.ui.NavDisplay
 import com.desafiomercadobitcoin.presentation.feature.exchangedetail.ExchangeDetailRoute
 import com.desafiomercadobitcoin.presentation.feature.exchangelist.ExchangeListRoute
 
-/**
- * Casca de navegação. A pilha é o **único** lugar que decide qual destino está visível.
- *
- * Os decoradores dão a cada entrada seu próprio escopo: o de estado salvável preserva a
- * posição de rolagem ao empilhar por cima, e o de `ViewModelStore` faz o `ViewModel` morrer
- * junto com a entrada que o criou.
- */
 @Composable
 fun AppNavigation(
     modifier: Modifier = Modifier,

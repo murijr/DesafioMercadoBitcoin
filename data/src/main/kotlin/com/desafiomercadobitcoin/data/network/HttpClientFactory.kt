@@ -19,10 +19,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
-/**
- * Ponto **único** de construção do cliente HTTP da camada (G-spec `data-network-foundation`).
- * Nenhum outro lugar do projeto monta um `HttpClient`.
- */
 object HttpClientFactory {
     fun create(
         engine: HttpClientEngine,
@@ -55,7 +51,6 @@ object HttpClientFactory {
                     headers.append(CoinMarketCapConfig.API_KEY_HEADER, config.apiKey)
                 }
 
-                // Ponto unico de traducao: acima daqui so circula DomainError tipado.
                 HttpResponseValidator {
                     handleResponseExceptionWithRequest { cause, _ ->
                         throw cause.toDomainErrorWithStatus()
@@ -64,14 +59,6 @@ object HttpClientFactory {
             }
         }
 
-    /**
-     * Cliente de imagens: **sem** credencial, sem `defaultRequest` e sem o validador de
-     * dominio.
-     *
-     * Reusar o cliente da API mandaria `X-CMC_PRO_API_KEY` para o host de imagens a cada
-     * logotipo -- vazamento de credencial para quem nao a exige -- e converteria um 404 de
-     * imagem em `DomainError` dentro do Coil, onde ninguem o trata (D5).
-     */
     fun createImageClient(engine: HttpClientEngine): HttpClient =
         runBlocking(Dispatchers.IO) {
             HttpClient(engine) {
@@ -83,14 +70,6 @@ object HttpClientFactory {
             }
         }
 
-    /**
-     * Status HTTP e vocabulario de transporte, entao a leitura dele mora aqui e nao em
-     * `:domain` -- leva-la para la exigiria ou uma dependencia de Ktor (fere o G1) ou mais
-     * checagem por nome de tipo (D4). `ThrowableToDomainError` segue intacto.
-     *
-     * `400` cai em `Network` junto do resto do `4xx`: e semanticamente impreciso, mas nao
-     * ha cenario de produto que o distinga hoje.
-     */
     private fun Throwable.toDomainErrorWithStatus(): Throwable =
         when {
             this !is ResponseException -> toDomainError()

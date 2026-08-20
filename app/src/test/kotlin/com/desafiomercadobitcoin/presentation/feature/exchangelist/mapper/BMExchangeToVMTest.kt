@@ -29,10 +29,6 @@ class BMExchangeToVMTest {
     private val unavailable = context.getString(R.string.exchange_field_unavailable)
     private val defaultTimeZone = TimeZone.getDefault()
 
-    /**
-     * Fuso a oeste de Greenwich: se a data fosse lida no fuso do dispositivo em vez de UTC,
-     * a meia-noite UTC do provedor viraria o dia anterior.
-     */
     @Before
     fun useTimeZoneWestOfGreenwich() {
         TimeZone.setDefault(TimeZone.getTimeZone("America/Sao_Paulo"))
@@ -125,5 +121,4 @@ class BMExchangeToVMTest {
 
 private const val BINANCE_ID = 270
 
-/** A meia-noite UTC de `LAUNCH_INSTANT` cai neste dia, e nao no anterior. */
 private val LAUNCH_DAY_AT_UTC: LocalDate = LocalDate.parse("2017-07-14")

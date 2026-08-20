@@ -41,14 +41,6 @@ import org.koin.core.context.stopKoin
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
-/**
- * Versão instrumentada de `AppNavigationTest` (G9) — mesmos cenários da suíte JVM/Robolectric
- * (G7), rodando sobre compositor e dispositivo reais. Mesmos duplos `mockk` dos *use cases* de
- * domínio, registrados em módulo Koin de teste, que a suíte JVM já usa.
- *
- * A pilha é o único lugar que decide o destino visível — então o teste observa a pilha e o
- * que a tela renderiza, e não a implementação da casca.
- */
 @RunWith(AndroidJUnit4::class)
 class AppNavigationTest {
     @get:Rule

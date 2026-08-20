@@ -7,11 +7,6 @@ import com.desafiomercadobitcoin.presentation.feature.exchangedetail.model.VMCur
 import java.text.NumberFormat
 import java.util.Locale
 
-/**
- * Preço integral, e não compacto: ao contrário do volume da listagem, o preço unitário de uma
- * moeda precisa da precisão inteira, sob pena de confundir "US$ 0" com indisponível em moedas
- * de preço fracionário pequeno (D8 de `add-exchange-detail`).
- */
 fun BMCurrency.toVM(resources: ResourceProvider): VMCurrency =
     VMCurrency(
         name = name,

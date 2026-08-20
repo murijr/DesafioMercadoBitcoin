@@ -10,18 +10,6 @@ import org.junit.runner.RunWith
 import org.koin.core.context.GlobalContext
 import org.koin.core.error.NoDefinitionFoundException
 
-/**
- * G5 — guarda das *keep rules*.
- *
- * Verifica, num dispositivo, que a `Application` monta seu grafo e que a `Activity` de entrada
- * chega ao estado resumed (`./gradlew :app:connectedDebugAndroidTest`).
- *
- * O artefato **ofuscado** e verificado por `scripts/release-smoke-check.sh`, e nao aqui:
- * instrumentar um APK minificado obriga a manter boa parte da stdlib no app, o que anularia
- * o proprio R8 que o G5 existe para exercitar.
- *
- * Fica **fora** do comando G8 de proposito: exige dispositivo, e G8 e uma suite JVM (G7).
- */
 @RunWith(AndroidJUnit4::class)
 class ColdStartSmokeTest {
     @Test

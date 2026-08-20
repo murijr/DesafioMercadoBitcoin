@@ -14,11 +14,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * `CurrencyListItem` isolado, sem montar `ExchangeDetailScreen` (G9): confirma que o componente
- * renderiza nome e preço, inclusive quando o preço é zero ou está ausente, em dispositivo/emulador
- * real.
- */
 @RunWith(AndroidJUnit4::class)
 class CurrencyListItemTest {
     @get:Rule

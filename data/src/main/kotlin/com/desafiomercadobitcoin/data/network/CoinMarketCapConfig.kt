@@ -1,9 +1,5 @@
 package com.desafiomercadobitcoin.data.network
 
-/**
- * Configuração do provedor. A chave **não** mora aqui: ela é injetada a partir do
- * `BuildConfig` do `:app`, porque `:data` não pode conhecer o módulo de aplicação.
- */
 data class CoinMarketCapConfig(
     val apiKey: String,
     val isDebug: Boolean = false,

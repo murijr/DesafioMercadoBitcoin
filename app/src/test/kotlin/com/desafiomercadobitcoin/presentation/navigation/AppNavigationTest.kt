@@ -41,10 +41,6 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 import org.robolectric.RobolectricTestRunner
 
-/**
- * A pilha é o único lugar que decide o destino visível — então o teste observa a pilha e o
- * que a tela renderiza, e não a implementação da casca.
- */
 @RunWith(RobolectricTestRunner::class)
 class AppNavigationTest {
     @get:Rule

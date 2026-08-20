@@ -229,7 +229,6 @@ private const val BINANCE_ID = 270
 private const val BITFINEX_ID = 294
 private const val MERCADO_BITCOIN_ID = 302
 
-/** Presente no indice e ausente do conteudo, de proposito. */
 private const val UNLISTED_ID = 999
 
 private const val SECOND_PAGE = 1

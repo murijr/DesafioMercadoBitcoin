@@ -25,11 +25,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.core.context.stopKoin
 
-/**
- * Versão instrumentada de `ExchangeDetailScreenTest` (G9) — mesmos cenários da suíte JVM/Robolectric
- * (G7), rodando sobre compositor e dispositivo reais em vez de uma sombra em JVM. As duas suítes
- * são aditivas: nenhuma substitui a outra.
- */
 @RunWith(AndroidJUnit4::class)
 class ExchangeDetailScreenTest {
     @get:Rule

@@ -42,22 +42,6 @@ const val TAG_CURRENCIES_LIST: String = "exchangeCurrenciesList"
 const val TAG_DETAIL_CONTENT: String = "exchangeDetailContent"
 const val TAG_DETAIL_BACK: String = "exchangeDetailBack"
 
-/**
- * Tela sem estado próprio: recebe o que renderizar e devolve o que o usuário fez — mesma
- * razão de `ExchangeListScreen`.
- *
- * O detalhe e a listagem de moedas têm estados de carregamento, erro e nova tentativa
- * independentes (D5/D7 de `add-exchange-detail`): a listagem só aparece depois que o detalhe
- * é obtido com sucesso, mas sua própria falha não afeta o detalhe já exibido.
- *
- * `onBackClick` é a ação do botão de voltar da `TopAppBar` — a tela não sabe *como* voltar
- * (isso é da pilha de navegação, em `AppNavigation`), só emite a intenção. O retorno pelo
- * sistema (gesto/botão) continua funcionando à parte, via `NavDisplay.onBack` (`app-shell`).
- *
- * `Scaffold` com `TopAppBar` herda `contentWindowInsets` (`WindowInsets.safeDrawing` por
- * padrão) — o app é edge-to-edge (`enableEdgeToEdge()` na `MainActivity`), e sem isso o
- * logotipo do cabeçalho renderiza atrás da barra de status, mesma razão de `ExchangeListScreen`.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExchangeDetailScreen(

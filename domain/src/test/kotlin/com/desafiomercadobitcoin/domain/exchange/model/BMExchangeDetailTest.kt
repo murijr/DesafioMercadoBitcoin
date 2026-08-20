@@ -6,10 +6,6 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 import java.time.Instant
 
-/**
- * Mesma regra de [BMExchangeTest]: ausência é `null`, e `0.0` é um valor informado como
- * qualquer outro (D1/D4 de `add-exchange-detail`).
- */
 class BMExchangeDetailTest {
     @Test
     fun `given a provider without optional fields when modelling then all are absent`() {

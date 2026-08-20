@@ -5,9 +5,6 @@ import com.lemonappdev.konsist.api.verify.assertFalse
 import com.lemonappdev.konsist.api.verify.assertTrue
 import org.junit.Test
 
-/**
- * G2 — regras de apresentacao e de dominio que nenhum outro guardrail alcanca.
- */
 class PresentationRulesTest {
     @Test
     fun `view models only depend on use cases and the resource provider`() {
@@ -36,10 +33,6 @@ class PresentationRulesTest {
             .assertFalse { it.type.name.contains("CoroutineScope") }
     }
 
-    /**
-     * O Android Lint so enxerga `HardcodedText` em XML e o `compose-lint-checks` nao tem
-     * detector equivalente, entao a regra "nenhum texto literal na UI" mora aqui.
-     */
     @Test
     fun `composables never render a hardcoded string`() {
         val literalArgument = Regex("""\b(text|contentDescription|label|placeholder)\s*=\s*"""")

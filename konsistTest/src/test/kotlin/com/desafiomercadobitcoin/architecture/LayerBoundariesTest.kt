@@ -5,10 +5,6 @@ import com.lemonappdev.konsist.api.verify.assertFalse
 import com.lemonappdev.konsist.api.verify.assertTrue
 import org.junit.Test
 
-/**
- * G2 — grafo de camadas. O que o Gradle nao consegue barrar sozinho (G1 so protege
- * `:domain`), o Konsist barra aqui.
- */
 class LayerBoundariesTest {
     @Test
     fun `domain never imports the android sdk`() {

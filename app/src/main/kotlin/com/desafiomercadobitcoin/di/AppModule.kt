@@ -11,10 +11,6 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
-/**
- * Wire-up do `:app`. É o único lugar do módulo que pode tocar em `:data` — `presentation/`
- * nunca importa a camada de dados.
- */
 val appModule =
     module {
         single<ResourceProvider> { AndroidResourceProvider(androidContext()) }

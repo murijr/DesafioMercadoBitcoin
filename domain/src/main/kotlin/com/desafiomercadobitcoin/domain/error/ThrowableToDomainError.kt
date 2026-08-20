@@ -3,12 +3,6 @@ package com.desafiomercadobitcoin.domain.error
 import kotlinx.coroutines.CancellationException
 import java.io.IOException
 
-/**
- * Traduz uma exceção arbitrária do mundo externo em [DomainError].
- *
- * Ponto único da conversão: quem estiver acima só enxerga erro tipado.
- * O cancelamento não é traduzível — re-lançar é o comportamento correto.
- */
 fun Throwable.toDomainError(): DomainError =
     when (this) {
         is CancellationException -> throw this
@@ -17,10 +11,6 @@ fun Throwable.toDomainError(): DomainError =
         else -> if (isSerializationFailure()) DomainError.Serialization() else DomainError.Unexpected()
     }
 
-/**
- * A serialização vive em `:data` (kotlinx.serialization) e `:domain` não pode importá-la.
- * A checagem é feita pelo nome do tipo, que é o preço de manter a fronteira Kotlin puro (G1).
- */
 private fun Throwable.isSerializationFailure(): Boolean {
     var current: Throwable? = this
     while (current != null) {

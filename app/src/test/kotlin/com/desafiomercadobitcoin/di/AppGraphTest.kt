@@ -25,10 +25,6 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class AppGraphTest {
-    /**
-     * A `Application` real ja iniciou o Koin ao subir sob Robolectric; o contexto global e
-     * estatico no JVM, entao cada teste precisa comecar do zero.
-     */
     @Before
     fun resetGraph() {
         stopKoin()
@@ -39,19 +35,12 @@ class AppGraphTest {
         stopKoin()
     }
 
-    /**
-     * `checkModules` esta deprecado em favor de `Module.verify()`, mas `verify()` ainda e
-     * `@KoinExperimentalAPI` e nao resolve as definicoes que dependem do `Context` do Android.
-     * Trocar agora seria substituir um aviso por um teste que nao funciona.
-     */
     @Test
     fun `given every module when the graph starts then all definitions are resolvable`() {
         startKoin {
             androidContext(ApplicationProvider.getApplicationContext<Application>())
             modules(dataModule(CoinMarketCapConfig(apiKey = "key")), appModule)
         }.checkModules {
-            // O `SavedStateHandle` de um `ViewModel` e criado pela plataforma, nao pelo
-            // grafo: sem instancia declarada, `checkModules` nao teria como resolve-lo.
             withInstance(SavedStateHandle())
         }
     }
@@ -109,9 +98,6 @@ class AppGraphTest {
                 modules(dataModule(CoinMarketCapConfig(apiKey = "key")), appModule)
             }.koin
 
-        // O cliente HTTP nao e assertavel daqui de proposito: `:data` expoe Ktor como
-        // `implementation`, entao `:app` nem compila se tentar toca-lo. checkModules()
-        // acima ja garante que ele resolve.
         assertNotNull(koin.get<ResourceProvider>())
     }
 }

@@ -34,10 +34,6 @@ const val TAG_INITIAL_LOADING: String = "exchangeListInitialLoading"
 const val TAG_PAGING_LOADING: String = "exchangeListPagingLoading"
 const val TAG_LIST: String = "exchangeList"
 
-/**
- * Tela sem estado próprio: recebe o que renderizar e devolve o que o usuário fez. É o que
- * a torna testável sem `ViewModel` e sem grafo de dependências.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExchangeListScreen(
@@ -88,10 +84,6 @@ private fun ExchangeContent(
     }
 }
 
-/**
- * A solicitação do lote seguinte nasce de um efeito, e não da composição: chamar o
- * `ViewModel` enquanto a tela compõe emitiria a mesma solicitação a cada recomposição.
- */
 @Composable
 private fun NotifyWhenNearTheEnd(
     listState: LazyListState,
@@ -174,5 +166,4 @@ private fun RetryButton(onEvent: (ExchangeListEvent) -> Unit) {
     }
 }
 
-/** Quantos itens antes do fim já disparam o lote seguinte. */
 private const val LOAD_MORE_THRESHOLD = 5

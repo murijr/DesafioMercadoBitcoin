@@ -5,17 +5,9 @@ import com.lemonappdev.konsist.api.verify.assertFalse
 import com.lemonappdev.konsist.api.verify.assertTrue
 import org.junit.Test
 
-/**
- * G2 — prefixos de modelo (`BM`/`DM`/`VM`) e sufixos de papel.
- * A fronteira fica visivel na assinatura: o tipo ja diz em que camada o objeto vive.
- */
 class NamingConventionsTest {
     private val layerPrefixes = listOf("BM", "DM", "VM")
 
-    /**
-     * Lista negada fechada: nenhum assert sabe distinguir sufixo de substantivo composto,
-     * entao a regra enumera os rotulos de camada em vez de proibir "qualquer sufixo".
-     */
     private val layerLabelSuffixes =
         listOf("Dto", "Model", "Entity", "Data", "Payload", "Body", "Json", "Schema")
 

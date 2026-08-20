@@ -1,6 +1,5 @@
 package com.desafiomercadobitcoin.presentation.feature.exchangelist
 
-/** O que o usuário fez. Entrada única do `ViewModel`. */
 sealed interface ExchangeListEvent {
     data object ScreenOpened : ExchangeListEvent
 

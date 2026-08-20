@@ -7,10 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.viewmodel.koinViewModel
 
-/**
- * Liga a tela ao seu `ViewModel`. O destino de detalhe é aberto por efeito, e não por
- * estado, porque navegar é acontecimento de uma vez só.
- */
 @Composable
 fun ExchangeListRoute(
     onExchangeSelected: (Int) -> Unit,

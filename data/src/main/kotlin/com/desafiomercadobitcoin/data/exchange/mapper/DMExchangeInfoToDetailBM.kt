@@ -4,12 +4,6 @@ import com.desafiomercadobitcoin.data.exchange.dto.DMExchangeInfo
 import com.desafiomercadobitcoin.domain.exchange.model.BMExchangeDetail
 import java.time.Instant
 
-/**
- * Sentido único: transporte → negócio, alimentando a tela de detalhe. Convive com [toBM] sem
- * encadear com ele (D1 de `add-exchange-detail`).
- *
- * `urls.website` é uma lista no provedor; a tela exibe só o primeiro item não vazio (D-Risks).
- */
 fun DMExchangeInfo.toDetailBM(): BMExchangeDetail =
     BMExchangeDetail(
         id = id,

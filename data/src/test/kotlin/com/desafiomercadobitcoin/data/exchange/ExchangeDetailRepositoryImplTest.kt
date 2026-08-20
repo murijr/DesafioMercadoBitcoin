@@ -158,7 +158,6 @@ class ExchangeDetailRepositoryImplTest {
 
 private const val BINANCE_ID = 270
 
-// Duas cotacoes proximas: a asercao so passa se a deduplicacao retiver a primeira ocorrencia.
 private const val FIRST_PRICE_USD = 1.20
 private const val SECOND_PRICE_USD = 1.21
 private const val PRICE_TOLERANCE = 0.0001

@@ -16,10 +16,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * `ExchangeListItem` isolado, sem montar `ExchangeListScreen` (G9): confirma que o componente
- * renderiza seus dados e reage ao toque por conta própria, em dispositivo/emulador real.
- */
 @RunWith(AndroidJUnit4::class)
 class ExchangeListItemTest {
     @get:Rule

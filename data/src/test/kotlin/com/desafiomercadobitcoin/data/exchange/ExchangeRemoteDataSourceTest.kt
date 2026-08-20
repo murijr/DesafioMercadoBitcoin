@@ -230,5 +230,4 @@ private const val MERCADO_BITCOIN_ID = 302
 private const val BINANCE_MAKER_FEE = 0.02
 private const val BINANCE_TAKER_FEE = 0.04
 
-/** Presente no indice e ausente do conteudo, de proposito. */
 private const val UNLISTED_ID = 999

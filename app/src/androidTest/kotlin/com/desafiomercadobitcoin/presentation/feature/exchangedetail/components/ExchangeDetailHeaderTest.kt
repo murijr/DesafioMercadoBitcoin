@@ -14,11 +14,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * `ExchangeDetailHeader` isolado, sem montar `ExchangeDetailScreen` (G9): confirma que o
- * componente renderiza seus campos, e degrada cada campo opcional ausente individualmente, em
- * dispositivo/emulador real.
- */
 @RunWith(AndroidJUnit4::class)
 class ExchangeDetailHeaderTest {
     @get:Rule

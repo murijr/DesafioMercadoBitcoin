@@ -18,15 +18,6 @@ import com.desafiomercadobitcoin.R
 import com.desafiomercadobitcoin.presentation.feature.exchangedetail.model.VMExchangeDetail
 import com.mikepenz.markdown.m3.Markdown
 
-/**
- * O logotipo é decorativo — o nome logo abaixo já é texto —, então `contentDescription` é
- * nulo: mesma razão de `ExchangeListItem`.
- *
- * `descriptionLabel` chega em Markdown — é como o provedor devolve o campo `description` —,
- * daí o `Markdown()` em vez de `Text()`: renderiza títulos, links e ênfase em vez do texto
- * cru com `##`/`[texto](url)`. O texto de indisponibilidade (quando o campo está ausente)
- * não tem sintaxe de Markdown, então passa por ele sem efeito colateral.
- */
 @Composable
 fun ExchangeDetailHeader(
     detail: VMExchangeDetail,

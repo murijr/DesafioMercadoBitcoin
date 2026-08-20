@@ -16,14 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/**
- * Estado do detalhe de uma *exchange* e das moedas que ela negocia.
- *
- * O `exchangeId` chega pelo `SavedStateHandle` — e não como parâmetro de construtor cru —
- * porque o G2 só permite `*UseCase`, `ResourceProvider` ou `SavedStateHandle` no construtor de
- * um `ViewModel` (D6 de `add-exchange-detail`). Quem o popula é `AppNavigation`, a partir da
- * chave de navegação.
- */
 class ExchangeDetailViewModel(
     private val getExchangeDetail: GetExchangeDetailUseCase,
     private val getExchangeCurrencies: GetExchangeCurrenciesUseCase,
@@ -36,19 +28,12 @@ class ExchangeDetailViewModel(
     private val exchangeId: Int
         get() = checkNotNull(savedStateHandle.get<Int>(KEY_EXCHANGE_ID)) { "exchangeId ausente no SavedStateHandle" }
 
-    /**
-     * Popula o `SavedStateHandle` com o id recebido da chave de navegação, na primeira vez.
-     * Idempotente: uma segunda chamada (recomposição) não sobrescreve o valor já presente —
-     * inclusive o restaurado após morte do processo, que carrega o mesmo id (D6 de
-     * `add-exchange-detail`).
-     */
     fun ensureExchangeId(id: Int) {
         if (savedStateHandle.get<Int>(KEY_EXCHANGE_ID) == null) {
             savedStateHandle[KEY_EXCHANGE_ID] = id
         }
     }
 
-    /** Única abertura de coroutine do `ViewModel`: os handlers nunca abrem a sua. */
     fun send(event: ExchangeDetailEvent) {
         viewModelScope.launch {
             when (event) {
@@ -59,10 +44,6 @@ class ExchangeDetailViewModel(
         }
     }
 
-    /**
-     * As duas cargas são independentes: nenhuma espera a outra terminar para que a falha ou a
-     * demora de uma não atrase a exibição da outra (D5 de `add-exchange-detail`).
-     */
     private suspend fun handleScreenOpened() {
         val current = state.value
         if (current.isLoadingDetail || current.detail != null) return
@@ -113,10 +94,6 @@ class ExchangeDetailViewModel(
             }
     }
 
-    /**
-     * O `UseCase` só devolve `DomainError`; o `else` existe porque a assinatura de `Result`
-     * é `Throwable` e um erro sem texto seria pior do que "algo deu errado".
-     */
     private fun messageOf(error: Throwable): String =
         resources.resolve((error as? DomainError ?: DomainError.Unexpected()).textKey)
 

@@ -13,21 +13,12 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.resources.get
 
-/**
- * IO e nada mais: monta a requisição, devolve o `DM` cru e sinaliza falha por lançamento.
- * Quem converte `Throwable` em `Result` é o `UseCase`.
- */
 class ExchangeRemoteDataSource(
     private val client: HttpClient,
 ) {
     suspend fun loadActiveIndex(): List<DMExchangeMapEntry> =
         client.get(ExchangeMapRoute()).body<DMExchangeMapResponse>().data
 
-    /**
-     * O limite de ids por consulta é do provedor, então é aqui que ele é respeitado — o
-     * chamador não carrega essa responsabilidade. Conjunto vazio não vira requisição:
-     * não há o que perguntar.
-     */
     suspend fun loadInfo(ids: List<Int>): Map<String, DMExchangeInfo> {
         if (ids.isEmpty()) return emptyMap()
         require(ids.size <= MAX_IDS_PER_REQUEST) {
@@ -39,7 +30,6 @@ class ExchangeRemoteDataSource(
             .data
     }
 
-    /** As moedas negociadas por uma corretora. O provedor devolve o conjunto inteiro numa única resposta. */
     suspend fun loadAssets(exchangeId: Int): List<DMExchangeAsset> =
         client
             .get(ExchangeAssetsRoute(id = exchangeId.toString()))

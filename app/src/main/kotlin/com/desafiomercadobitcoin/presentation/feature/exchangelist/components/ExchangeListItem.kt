@@ -19,10 +19,6 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.desafiomercadobitcoin.presentation.feature.exchangelist.model.VMExchange
 
-/**
- * O logotipo é decorativo — o nome ao lado já é texto —, então `contentDescription` é nulo:
- * é o que satisfaz o `ContentDescription` do Lint sem criar literal, que o Konsist reprovaria.
- */
 @Composable
 fun ExchangeListItem(
     exchange: VMExchange,

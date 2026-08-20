@@ -17,13 +17,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/**
- * Estado da listagem de corretoras.
- *
- * O `SavedStateHandle` guarda a **página alcançada**, e não os itens: restaurar centenas de
- * objetos por `Bundle` estouraria o limite da transação (D8). A mudança de configuração já é
- * coberta pelo próprio `ViewModel`.
- */
 class ExchangeListViewModel(
     private val getExchangePage: GetExchangePageUseCase,
     private val resources: ResourceProvider,
@@ -32,11 +25,9 @@ class ExchangeListViewModel(
     private val mutableState = MutableStateFlow(VMExchangeListState())
     val state: StateFlow<VMExchangeListState> = mutableState.asStateFlow()
 
-    // Sem `replay`: um efeito de navegacao reentregue a um novo coletor navegaria de novo.
     private val mutableEffect = MutableSharedFlow<ExchangeListEffect>(extraBufferCapacity = 1)
     val effect: SharedFlow<ExchangeListEffect> = mutableEffect.asSharedFlow()
 
-    /** Única abertura de coroutine do `ViewModel`: os handlers nunca abrem a sua. */
     fun send(event: ExchangeListEvent) {
         viewModelScope.launch {
             when (event) {
@@ -53,7 +44,6 @@ class ExchangeListViewModel(
         val current = state.value
         if (current.isLoading || current.items.isNotEmpty()) return
 
-        // Lido antes da carga: publicar a primeira pagina ja reescreve a pagina alcancada.
         val reached = savedStateHandle.get<Int>(KEY_REACHED_PAGE) ?: FIRST_PAGE
 
         loadFirstPage()
@@ -94,10 +84,6 @@ class ExchangeListViewModel(
             }
     }
 
-    /**
-     * Lido **antes** da primeira suspensão de [loadNextPage]: é o que impede a rolagem de
-     * emitir uma segunda solicitação para o lote que já está em andamento.
-     */
     private fun canLoadMore(): Boolean = with(state.value) { hasMore && !isLoading && !isLoadingMore }
 
     private fun publishFirst(page: BMExchangePage) {
@@ -125,10 +111,6 @@ class ExchangeListViewModel(
         savedStateHandle[KEY_REACHED_PAGE] = page.page
     }
 
-    /**
-     * O `UseCase` só devolve `DomainError`; o `else` existe porque a assinatura de `Result`
-     * é `Throwable` e um erro sem texto seria pior do que "algo deu errado".
-     */
     private fun messageOf(error: Throwable): String =
         resources.resolve((error as? DomainError ?: DomainError.Unexpected()).textKey)
 

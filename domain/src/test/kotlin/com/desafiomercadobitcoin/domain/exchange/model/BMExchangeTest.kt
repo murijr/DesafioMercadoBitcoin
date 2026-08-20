@@ -6,10 +6,6 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 import java.time.Instant
 
-/**
- * O modelo de negócio descreve o fato "o provedor não informou", e não a sua apresentação:
- * ausência é `null`, e `0.0` é um valor informado como qualquer outro (D2).
- */
 class BMExchangeTest {
     @Test
     fun `given a provider without volume and launch date when modelling then both are absent`() {
